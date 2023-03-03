@@ -7,5 +7,6 @@ async fn main() -> std::io::Result<()> {
     println!("Starting the server....");
     let listener = TcpListener::bind("127.0.0.1:0")
         .expect("cannot find an TcpListener to bind");
-    zero2prod::run(listener)?.await
+
+    zero2prod::startup::run(listener)?.await
 }

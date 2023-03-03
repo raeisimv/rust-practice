@@ -38,3 +38,6 @@ done
 
 export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
 sqlx database create
+sqlx mig run
+
+echo >&2 "Postgres migrations have done, ready to go!"
