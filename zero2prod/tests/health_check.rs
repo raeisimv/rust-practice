@@ -4,12 +4,12 @@ mod shared;
 #[tokio::test]
 async fn health_check_works() {
     // Arrange
-    let address = shared::spawn_app();
+    let app = shared::spawn_app().await;
     let client = reqwest::Client::new();
 
     // Act
     let response = client
-        .get(format!("{address}/health_check"))
+        .get(format!("{}/health_check", app.address))
         .send()
         .await
         .expect("unable to make the service call");

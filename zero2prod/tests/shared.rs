@@ -1,13 +1,30 @@
 use std::net::TcpListener;
+use sqlx::{PgPool};
 use tokio;
+use zero2prod::conf;
 
-pub fn spawn_app() -> String {
+pub struct TestApp {
+    pub address: String,
+    pub db_pool: PgPool,
+}
+
+pub async fn spawn_app() -> TestApp {
+    let conf = conf::get_configuration()
+        .expect("failed to get_configuration");
+
     let listener = TcpListener::bind("127.0.0.1:0")
-        .expect("cannot find a random port to bind");
+        .expect("failed to find a random port to bind");
     let port = listener.local_addr().unwrap().port();
-    let server = zero2prod::startup::run(listener)
+
+    let db_pool = PgPool::connect(&conf.database.conn_string())
+        .await
+        .expect("failed to connect to pg");
+
+    let server = zero2prod::startup::run(listener, db_pool.clone())
         .expect("failed to bind address");
     let _ = tokio::spawn(server);
-
-    format!("http://127.0.0.1:{port}")
+    TestApp {
+        db_pool,
+        address: format!("http://127.0.0.1:{port}"),
+    }
 }
