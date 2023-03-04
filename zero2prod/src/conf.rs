@@ -15,8 +15,23 @@ pub struct DatabaseSettings {
     pub database_name: String,
 }
 
-pub fn load_conf() -> Result<Settings, ConfigError> {
-    let mut conf = Config::default();
-    conf.merge(File::with_name("conf"))?;
-    conf.try_into()
+impl DatabaseSettings {
+    pub fn conn_string(&self) -> String {
+        format!(
+            "postgres://{}:{}@{}:{}/{}",
+            self.username,
+            self.password,
+            self.host,
+            self.port,
+            self.database_name
+        )
+    }
+}
+
+pub fn get_configuration() -> Result<Settings, ConfigError> {
+    Config::builder()
+        .add_source(File::with_name("conf"))
+        .build()
+        .unwrap()
+        .try_deserialize()
 }
