@@ -1,8 +1,7 @@
 use std::net::TcpListener;
 use sqlx::{PgPool};
 use tokio;
-use zero2prod;
-use zero2prod::conf;
+use zero2prod::{self, conf};
 use env_logger::Env;
 
 #[tokio::main]
