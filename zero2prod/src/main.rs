@@ -1,4 +1,5 @@
 use std::net::TcpListener;
+use secrecy::ExposeSecret;
 use sqlx::{PgPool};
 use tokio;
 use zero2prod::{self, conf, telemetry};
@@ -16,8 +17,7 @@ async fn main() -> std::io::Result<()> {
     let conf = conf::get_configuration()
         .expect("failed to get_configuration");
 
-    let conn_str = conf.database.conn_string();
-    let db_pool = PgPool::connect(&conn_str)
+    let db_pool = PgPool::connect(conf.database.conn_string().expose_secret())
         .await
         .expect("failed to connect to postgres");
     tracing::info!("connect to pg_pool: {}", conf.database.database_name);

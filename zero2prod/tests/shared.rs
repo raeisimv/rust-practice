@@ -3,6 +3,7 @@ use std::net::TcpListener;
 use sqlx::{PgConnection, Connection, PgPool, Executor};
 use zero2prod::{conf, conf::DatabaseSettings, telemetry};
 use once_cell::sync::Lazy;
+use secrecy::ExposeSecret;
 
 pub struct TestApp {
     pub address: String,
@@ -47,7 +48,7 @@ pub async fn spawn_app() -> TestApp {
 
 pub async fn establish_database(database_conf: &DatabaseSettings) -> PgPool {
     // Connect and create db
-    let mut conn = PgConnection::connect(&database_conf.conn_string_without_db())
+    let mut conn = PgConnection::connect(&database_conf.conn_string_without_db().expose_secret())
         .await
         .expect("failed to establish pg conn");
     conn
@@ -56,7 +57,7 @@ pub async fn establish_database(database_conf: &DatabaseSettings) -> PgPool {
         .expect("failed to create db on established conn");
 
     // Migrate
-    let db_pool = PgPool::connect(&database_conf.conn_string())
+    let db_pool = PgPool::connect(&database_conf.conn_string().expose_secret())
         .await
         .expect("failed to create pg pool");
     sqlx::migrate!("./migrations")
