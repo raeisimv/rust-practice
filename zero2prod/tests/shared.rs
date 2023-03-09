@@ -8,20 +8,35 @@ use secrecy::ExposeSecret;
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
+    db_name: String,
+    conn: PgConnection,
+}
+
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        tracing::info!("dropping the temp database: {}", &self.db_name);
+        self.conn
+            .execute(format!(r#"DROP DATABASE "{}""#, self.db_name).as_str())
+        ;
+    }
 }
 
 static TRACING: Lazy<()> = Lazy::new(|| {
-    let sink = if std::env::var("TEST_LOG").is_ok() {
-        std::io::stdout
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = telemetry::get_subscriber(
+            "test".into(),
+            "debug".into(),
+            std::io::stdout,
+        );
+        telemetry::init_subscriber(subscriber);
     } else {
-        std::io::sink
+        let subscriber = telemetry::get_subscriber(
+            "test".into(),
+            "debug".into(),
+            std::io::sink,
+        );
+        telemetry::init_subscriber(subscriber);
     };
-    let subscriber = telemetry::get_subscriber(
-        "test".into(),
-        "debug".into(),
-        sink,
-    );
-    telemetry::init_subscriber(subscriber);
 });
 
 pub async fn spawn_app() -> TestApp {
@@ -35,7 +50,7 @@ pub async fn spawn_app() -> TestApp {
     let port = listener.local_addr().unwrap().port();
 
     conf.database.database_name = uuid::Uuid::new_v4().to_string();
-    let db_pool = establish_database(&conf.database).await;
+    let (db_pool, conn) = establish_database(&conf.database).await;
 
     let server = zero2prod::startup::run(listener, db_pool.clone())
         .expect("failed to bind address");
@@ -43,10 +58,12 @@ pub async fn spawn_app() -> TestApp {
     TestApp {
         db_pool,
         address: format!("http://127.0.0.1:{port}"),
+        db_name: conf.database.database_name,
+        conn,
     }
 }
 
-pub async fn establish_database(database_conf: &DatabaseSettings) -> PgPool {
+pub async fn establish_database(database_conf: &DatabaseSettings) -> (PgPool, PgConnection) {
     // Connect and create db
     let mut conn = PgConnection::connect(&database_conf.conn_string_without_db().expose_secret())
         .await
@@ -65,5 +82,5 @@ pub async fn establish_database(database_conf: &DatabaseSettings) -> PgPool {
         .await
         .expect("failed to run migration on the establish db");
 
-    db_pool
+    (db_pool, conn)
 }
