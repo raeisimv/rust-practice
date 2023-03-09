@@ -13,7 +13,6 @@ pub struct SubscriptionFormData {
 name = "POST subscriptions"
 skip(body, conn)
 fields(
-request_id = % Uuid::new_v4(),
 subscriber_name = % body.name,
 subscriber_email = % body.email
 )
