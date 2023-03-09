@@ -1,15 +1,31 @@
+use tokio;
 use std::net::TcpListener;
 use sqlx::{PgConnection, Connection, PgPool, Executor};
-use tokio;
-use zero2prod::conf;
-use zero2prod::conf::DatabaseSettings;
+use zero2prod::{conf, conf::DatabaseSettings, telemetry};
+use once_cell::sync::Lazy;
 
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
 }
 
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let sink = if std::env::var("TEST_LOG").is_ok() {
+        std::io::stdout
+    } else {
+        std::io::sink
+    };
+    let subscriber = telemetry::get_subscriber(
+        "test".into(),
+        "debug".into(),
+        sink,
+    );
+    telemetry::init_subscriber(subscriber);
+});
+
 pub async fn spawn_app() -> TestApp {
+    Lazy::force(&TRACING);
+
     let mut conf = conf::get_configuration()
         .expect("failed to get_configuration");
 
