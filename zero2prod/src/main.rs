@@ -5,9 +5,12 @@ use zero2prod::{self, conf};
 use tracing::subscriber::set_global_default;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::{layer::SubscriberExt, EnvFilter, Registry};
+use tracing_log::LogTracer;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    LogTracer::init().expect("failed to init LogTracer");
+
     let env_filter = EnvFilter::try_from_default_env()
         .unwrap_or(EnvFilter::new("info"));
 
