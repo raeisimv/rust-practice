@@ -1,13 +1,22 @@
-FROM rust:1.68
+FROM rust:1.68 AS builder
 
 WORKDIR /app
 RUN apt update && apt install lld clang -y
 COPY . .
-
 ENV SQLX_OFFLINE true
-ENV APP_ENVIRONMENT production
-
-EXPOSE 8000:8000
-
 RUN cargo build --release
-ENTRYPOINT ["./target/release/zero2prod"]
+
+FROM debian:bullseye-slim AS runtime
+WORKDIR /app
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    # Clean up \
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/zero2prod zero2prod
+COPY conf conf
+
+ENV APP_ENVIRONMENT production
+ENTRYPOINT ["./zero2prod"]
