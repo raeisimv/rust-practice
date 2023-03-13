@@ -7,3 +7,4 @@ database:
   username: "postgres"
   password: "s123"
   database_name: "newsletter"
+  required_ssl: false
