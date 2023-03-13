@@ -1,6 +1,5 @@
 use std::net::TcpListener;
 use tokio;
-use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
 use zero2prod::{self, conf, telemetry};
 
@@ -19,8 +18,7 @@ async fn main() -> std::io::Result<()> {
 
     let db_pool = PgPoolOptions::new()
         .acquire_timeout(std::time::Duration::from_secs(15))
-        .connect_lazy(conf.database.conn_string().expose_secret())
-        .expect("failed to lazily connect to postgres")
+        .connect_lazy_with(conf.database.with_db())
         ;
 
     tracing::info!("connect to pg_pool: {}", conf.database.database_name);
