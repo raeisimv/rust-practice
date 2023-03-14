@@ -34,6 +34,7 @@ impl DatabaseSettings {
             .password(&self.password.expose_secret())
             .ssl_mode(ssl_mod)
     }
+
     pub fn with_db(&self) -> PgConnectOptions {
         let mut opts = self.without_db().database(&self.database_name);
         opts.log_statements(tracing::log::LevelFilter::Trace);

@@ -11,15 +11,6 @@ pub struct TestApp {
     conn: PgConnection,
 }
 
-impl Drop for TestApp {
-    fn drop(&mut self) {
-        tracing::info!("dropping the temp database: {}", &self.db_name);
-        self.conn
-            .execute(format!(r#"DROP DATABASE "{}""#, self.db_name).as_str())
-        ;
-    }
-}
-
 static TRACING: Lazy<()> = Lazy::new(|| {
     if std::env::var("TEST_LOG").is_ok() {
         let subscriber = telemetry::get_subscriber(
@@ -48,7 +39,7 @@ pub async fn spawn_app() -> TestApp {
         .expect("failed to find a random port to bind");
     let port = listener.local_addr().unwrap().port();
 
-    conf.database.database_name = uuid::Uuid::new_v4().to_string();
+    conf.database.database_name = format!( "test_{}",uuid::Uuid::new_v4().to_string());
     let (db_pool, conn) = establish_database(&conf.database).await;
 
     let server = zero2prod::startup::run(listener, db_pool.clone())
@@ -73,7 +64,7 @@ pub async fn establish_database(database_conf: &DatabaseSettings) -> (PgPool, Pg
         .expect("failed to create db on established conn");
 
     // Migrate
-    let db_pool = PgPool::connect_with(database_conf.without_db())
+    let db_pool = PgPool::connect_with(database_conf.with_db())
         .await
         .expect("failed to create pg pool");
     sqlx::migrate!("./migrations")
