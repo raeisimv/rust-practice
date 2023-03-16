@@ -7,8 +7,6 @@ use once_cell::sync::Lazy;
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
-    db_name: String,
-    conn: PgConnection,
 }
 
 static TRACING: Lazy<()> = Lazy::new(|| {
@@ -39,8 +37,8 @@ pub async fn spawn_app() -> TestApp {
         .expect("failed to find a random port to bind");
     let port = listener.local_addr().unwrap().port();
 
-    conf.database.database_name = format!( "test_{}",uuid::Uuid::new_v4().to_string());
-    let (db_pool, conn) = establish_database(&conf.database).await;
+    conf.database.database_name = format!("test_{}", uuid::Uuid::new_v4().to_string());
+    let db_pool = establish_database(&conf.database).await;
 
     let server = zero2prod::startup::run(listener, db_pool.clone())
         .expect("failed to bind address");
@@ -48,12 +46,10 @@ pub async fn spawn_app() -> TestApp {
     TestApp {
         db_pool,
         address: format!("http://127.0.0.1:{port}"),
-        db_name: conf.database.database_name,
-        conn,
     }
 }
 
-pub async fn establish_database(database_conf: &DatabaseSettings) -> (PgPool, PgConnection) {
+pub async fn establish_database(database_conf: &DatabaseSettings) -> PgPool {
     // Connect and create db
     let mut conn = PgConnection::connect_with(&database_conf.without_db())
         .await
@@ -72,5 +68,5 @@ pub async fn establish_database(database_conf: &DatabaseSettings) -> (PgPool, Pg
         .await
         .expect("failed to run migration on the establish db");
 
-    (db_pool, conn)
+    db_pool
 }
