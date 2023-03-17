@@ -1,12 +1,6 @@
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug)]
-pub struct NewSubscriber {
-    pub email: String,
-    pub name: SubscriberName,
-}
-
-#[derive(Debug)]
 pub struct SubscriberName(String);
 
 impl AsRef<str> for SubscriberName {
@@ -72,7 +66,7 @@ mod tests {
 
     #[test]
     fn a_valid_name_is_parsed_successfully() {
-        let name = "Morteza Raeisi Vanani".to_string();
+        let name = "Jacob Jacobian".to_string();
         assert_ok!(SubscriberName::parse(name));
     }
 }

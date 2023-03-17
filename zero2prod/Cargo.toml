@@ -30,6 +30,7 @@ tracing-actix-web = "0.7.2"
 serde-aux = "4.1.2"
 unicode-segmentation = "1.10.1"
 claim = "0.5.0"
+validator = "0.16.0"
 
 [dependencies.sqlx]
 version = "0.6.2"
@@ -43,3 +44,6 @@ features = [
     "migrate",
     "offline",
 ]
+
+[dev-dependencies]
+fake = "2.5.0"
