@@ -10,31 +10,32 @@ pub struct SubscriptionFormData {
     email: String,
 }
 
+impl TryFrom<SubscriptionFormData> for NewSubscriber {
+    type Error = String;
+
+    fn try_from(value: SubscriptionFormData) -> Result<Self, Self::Error> {
+        Ok(NewSubscriber {
+            name: SubscriberName::parse(value.name)?,
+            email: SubscriberEmail::parse(value.email)?,
+        })
+    }
+}
+
 #[tracing::instrument(
 name = "POST subscriptions"
-skip(body, conn)
+skip(form_data, conn)
 fields(
-subscriber_name = % body.name,
-subscriber_email = % body.email
+subscriber_name = % form_data.name,
+subscriber_email = % form_data.email
 )
 )]
-pub async fn subscriptions(body: web::Form<SubscriptionFormData>, conn: web::Data<PgPool>)
+pub async fn subscriptions(form_data: web::Form<SubscriptionFormData>, conn: web::Data<PgPool>)
                            -> HttpResponse {
-    let subscriber_name = match SubscriberName::parse(body.0.name) {
-        Ok(name) => name,
+    let new_subscriber = match form_data.0.try_into() {
+        Ok(subscriber) => subscriber,
         Err(_) => {
             return HttpResponse::BadRequest().finish();
         }
-    };
-    let subscriber_email = match SubscriberEmail::parse(body.0.email) {
-        Ok(email) => email,
-        Err(_) => {
-            return HttpResponse::BadRequest().finish();
-        }
-    };
-    let new_subscriber = NewSubscriber {
-        name: subscriber_name,
-        email: subscriber_email,
     };
     match db_insert_subscriber(&new_subscriber, &conn).await {
         Ok(_) => HttpResponse::Ok().finish(),
