@@ -56,12 +56,6 @@ mod tests {
         assert_err!(SubscriberEmail::parse(email));
     }
 
-    // #[test]
-    // fn email_missing_domain_is_rejected() {
-    //     let email = "jacob@gmail".to_string();
-    //     assert_err!(SubscriberEmail::parse(email));
-    // }
-
     #[quickcheck_macros::quickcheck]
     fn valid_email_is_parsed_successfully(email: ValidEmailFixture) -> bool {
         SubscriberEmail::parse(email.0).is_ok()

@@ -24,10 +24,7 @@ impl TryFrom<SubscriptionFormData> for NewSubscriber {
 #[tracing::instrument(
 name = "POST subscriptions"
 skip(form_data, conn)
-fields(
-subscriber_name = % form_data.name,
-subscriber_email = % form_data.email
-)
+fields(subscriber_name = % form_data.name,subscriber_email = % form_data.email)
 )]
 pub async fn subscriptions(form_data: web::Form<SubscriptionFormData>, conn: web::Data<PgPool>)
                            -> HttpResponse {
