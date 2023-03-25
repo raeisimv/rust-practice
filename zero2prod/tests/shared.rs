@@ -4,6 +4,8 @@ use sqlx::{PgConnection, Connection, PgPool, Executor};
 use zero2prod::{conf, conf::DatabaseSettings, telemetry};
 use once_cell::sync::Lazy;
 
+// Hello from the new brand of Mac Book
+
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
