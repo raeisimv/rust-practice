@@ -3,8 +3,7 @@ use std::net::TcpListener;
 use sqlx::{PgConnection, Connection, PgPool, Executor};
 use zero2prod::{conf, conf::DatabaseSettings, telemetry};
 use once_cell::sync::Lazy;
-
-// Hello from the new brand of Mac Book
+use zero2prod::email_client::EmailClient;
 
 pub struct TestApp {
     pub address: String,
@@ -35,6 +34,13 @@ pub async fn spawn_app() -> TestApp {
     let mut conf = conf::get_configuration()
         .expect("failed to get_configuration");
 
+    let sender_email = conf.email_client.sender()
+        .expect("invalid sender_email conf");
+    let email_client = EmailClient::new(
+        conf.email_client.base_url,
+        sender_email,
+    );
+
     let listener = TcpListener::bind("127.0.0.1:0")
         .expect("failed to find a random port to bind");
     let port = listener.local_addr().unwrap().port();
@@ -42,7 +48,7 @@ pub async fn spawn_app() -> TestApp {
     conf.database.database_name = format!("test_{}", uuid::Uuid::new_v4().to_string());
     let db_pool = establish_database(&conf.database).await;
 
-    let server = zero2prod::startup::run(listener, db_pool.clone())
+    let server = zero2prod::startup::run(listener, db_pool.clone(), email_client)
         .expect("failed to bind address");
     let _ = tokio::spawn(server);
     TestApp {

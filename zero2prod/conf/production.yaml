@@ -4,3 +4,7 @@ application:
 
 database:
   required_ssl: true
+
+email_client:
+  base_url: "https://api.postmarkapp"
+  sender_email: "test@example.com
