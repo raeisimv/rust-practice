@@ -1,0 +1,14 @@
+[package]
+name = "x00_find_hwnd"
+version = "0.1.0"
+edition = "2021"
+authors = ["Morteza Raeisi <raeisimv@outlook.com>"]
+repository = "https://github.com/raeisimv/rust-practice.git"
+
+# Windows sys-call interface
+[dependencies.windows]
+version = "0.58"
+features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+]
