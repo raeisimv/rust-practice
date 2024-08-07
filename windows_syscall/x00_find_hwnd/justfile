@@ -1,0 +1,10 @@
+set shell := ["powershell.exe", "-c"]
+
+dev:
+    cargo watch -x fmt -x check -x run
+
+fmt:
+    cargo fmt
+
+build:
+    cargo build --release

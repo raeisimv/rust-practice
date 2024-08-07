@@ -1,6 +1,8 @@
 use std::sync::{Arc, Mutex};
 use windows::Win32::Foundation::{BOOL, HWND, LPARAM};
-use windows::Win32::UI::WindowsAndMessaging::{EnumChildWindows, GetDesktopWindow, RealGetWindowClassA};
+use windows::Win32::UI::WindowsAndMessaging::{
+    EnumChildWindows, GetDesktopWindow, RealGetWindowClassA,
+};
 
 type GetTargetType = Arc<Mutex<Option<HWND>>>;
 const TARGET_APP_TITLE: &str = "TaskManagerWindow";
@@ -12,7 +14,7 @@ fn main() {
     };
 
     assert_ne!(app_hwn, HWND::default(), "app handle must not be empty");
-    println!("handler for '{}' is {:?}", TARGET_APP_TITLE, app_hwn);
+    println!("handle for '{}' is {:?}", TARGET_APP_TITLE, app_hwn);
 }
 
 fn find_app_hwnd() -> Option<HWND> {
