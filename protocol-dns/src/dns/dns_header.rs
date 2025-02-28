@@ -1,5 +1,6 @@
 use crate::dns::{BytePacketBuffer, Result, ResultCode};
 
+#[derive(Copy, Clone, Debug)]
 pub struct DnsHeader {
     pub id: u16,
 
