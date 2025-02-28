@@ -37,7 +37,7 @@ impl DnsRecord {
 
                 Ok(DnsRecord::A { domain, addr, ttl })
             }
-            QueryType::UNKNOWN(x) => {
+            QueryType::UNKNOWN(_) => {
                 buf.step(data_len as usize)?;
 
                 Ok(DnsRecord::UNKNOWN {
