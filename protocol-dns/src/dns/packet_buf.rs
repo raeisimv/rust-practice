@@ -54,8 +54,7 @@ impl BytePacketBuffer {
     }
 
     pub fn read_u16(&mut self) -> Result<u16> {
-        let res = ((self.read()? as u16) << 8)
-        | ((self.read()? as u16) << 0);
+        let res = ((self.read()? as u16) << 8) | ((self.read()? as u16) << 0);
         Ok(res)
     }
 
