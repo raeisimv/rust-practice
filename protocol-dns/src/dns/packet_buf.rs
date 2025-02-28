@@ -1,8 +1,6 @@
+use crate::dns::errors::*;
+
 const MAX_JUMP_ALLOWED: usize = 5;
-
-type Error = Box<dyn std::error::Error>;
-type Result<T = (), E = Error> = std::result::Result<T, E>;
-
 pub struct BytePacketBuffer {
     pub buf: [u8; 512],
     pub pos: usize,
@@ -53,6 +51,12 @@ impl BytePacketBuffer {
             return Err("End of buffer".into());
         }
         Ok(&self.buf[start..start + len])
+    }
+
+    pub fn read_u16(&mut self) -> Result<u16> {
+        let res = ((self.read()? as u16) << 8)
+        | ((self.read()? as u16) << 0);
+        Ok(res)
     }
 
     pub fn read_u32(&mut self) -> Result<u32> {

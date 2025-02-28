@@ -1,7 +1,6 @@
 use protocol_dns::dns::*;
 
-
 fn main() {
-    let buf = BytePacketBuffer::new();
-    println!("app run successfully.");
+    let _buf = BytePacketBuffer::new();
+    println!("app ran successfully.");
 }
