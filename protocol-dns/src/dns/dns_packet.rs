@@ -43,4 +43,25 @@ impl DnsPacket {
         }
         Ok(result)
     }
+    pub fn write(&mut self, buf: &mut BytePacketBuffer) -> Result {
+        self.header.questions = self.questions.len() as u16;
+        self.header.answers = self.answers.len() as u16;
+        self.header.authoritative_entries = self.authorities.len() as u16;
+        self.header.resource_entries = self.resources.len() as u16;
+        self.header.write(buf)?;
+
+        for q in self.questions.iter() {
+            q.write(buf)?;
+        }
+        for record in self.answers.iter() {
+            record.write(buf)?;
+        }
+        for record in self.authorities.iter() {
+            record.write(buf)?;
+        }
+        for record in self.resources.iter() {
+            record.write(buf)?;
+        }
+        Ok(())
+    }
 }
