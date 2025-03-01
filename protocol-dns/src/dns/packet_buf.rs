@@ -31,30 +31,29 @@ impl BytePacketBuffer {
 
     pub fn read(&mut self) -> Result<u8> {
         if self.pos >= 512 {
-            return Err("end of buffer".into());
+            return Err("read: End of buffer".into());
         }
-        let tmp = self.buf[self.pos];
-        self.step(1)?;
-
-        Ok(tmp)
+        let res = self.buf[self.pos];
+        self.pos += 1;
+        Ok(res)
     }
 
     pub fn get(&self, pos: usize) -> Result<u8> {
-        if pos > 512 {
-            return Err("End of buffer".into());
+        if pos >= 512 {
+            return Err("get: End of buffer".into());
         }
         Ok(self.buf[pos])
     }
 
     pub fn get_range(&self, start: usize, len: usize) -> Result<&[u8]> {
         if start + len >= 512 {
-            return Err("End of buffer".into());
+            return Err("get_range: End of buffer".into());
         }
         Ok(&self.buf[start..start + len])
     }
 
     pub fn read_u16(&mut self) -> Result<u16> {
-        let res = ((self.read()? as u16) << 8) | ((self.read()? as u16) << 0);
+        let res = ((self.read()? as u16) << 8) | (self.read()? as u16);
         Ok(res)
     }
 
@@ -84,7 +83,7 @@ impl BytePacketBuffer {
                 }
 
                 let b2 = self.get(pos + 1)? as u16;
-                let offset = (((len as u16) & 0xC0) << 8) | b2;
+                let offset = (((len as u16) ^ 0xC0) << 8) | b2;
                 pos = offset as usize;
 
                 jumped = true;

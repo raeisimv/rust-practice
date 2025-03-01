@@ -22,7 +22,7 @@ fn main() -> Result {
     for rec in packet.resources {
         println!("{:#?}", rec);
     }
-    
+
     println!("app ran successfully.");
     Ok(())
 }
