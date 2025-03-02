@@ -52,6 +52,16 @@ impl BytePacketBuffer {
         Ok(&self.buf[start..start + len])
     }
 
+    pub fn set(&mut self, pos: usize, val: u8) -> Result {
+        self.buf[pos] = val;
+
+        Ok(())
+    }
+    pub fn set_u16(&mut self, pos: usize, val: u16) -> Result {
+        self.set(pos + 0, ((val >> 8) & 0xFF) as u8)?;
+        self.set(pos + 1, ((val >> 0) & 0xFF) as u8)?;
+        Ok(())
+    }
     pub fn read_u16(&mut self) -> Result<u16> {
         let res = ((self.read()? as u16) << 8) | (self.read()? as u16);
         Ok(res)
