@@ -2,7 +2,7 @@ use protocol_dns::dns::*;
 use std::io::Read;
 
 fn main() -> Result {
-    let qname = "deltafx.com";
+    let qname = "crates.io";
     let qtype = QueryType::A;
     let server = ("8.8.8.8", 53);
     let socket = std::net::UdpSocket::bind(("0.0.0.0", 0))?;
