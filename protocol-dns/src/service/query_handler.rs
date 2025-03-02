@@ -1,0 +1,50 @@
+use crate::dns::{BytePacketBuffer, DnsPacket, Result, ResultCode};
+use crate::service::lookup;
+use std::net::UdpSocket;
+
+pub fn query_handler(socket: &UdpSocket) -> Result<DnsPacket> {
+    let mut req_buf = BytePacketBuffer::new();
+
+    let (_, src) = socket.recv_from(&mut req_buf.buf)?;
+    let mut request = DnsPacket::from_buffer(&mut req_buf)?;
+
+    let mut packet = DnsPacket::new();
+    packet.header.id = request.header.id;
+    packet.header.recursion_desired = true;
+    packet.header.recursion_available = true;
+    packet.header.response = true;
+
+    if let Some(question) = request.questions.pop() {
+        println!("question: {question:?}");
+        if let Ok(result) = lookup(&question.name, question.qtype) {
+            packet.questions.push(question);
+            packet.header.rescode = result.header.rescode;
+
+            for r in result.answers {
+                println!("answer: {r:?}");
+                packet.answers.push(r);
+            }
+            for r in result.authorities {
+                println!("authority: {r:?}");
+                packet.authorities.push(r);
+            }
+            for r in result.resources {
+                println!("resource: {r:?}");
+                packet.resources.push(r);
+            }
+        } else {
+            packet.header.rescode = ResultCode::SERVFAIL;
+        }
+    } else {
+        packet.header.rescode = ResultCode::FORMERR;
+    }
+
+    let mut res_buf = BytePacketBuffer::new();
+    packet.write(&mut res_buf)?;
+
+    let len = res_buf.pos();
+    let data = res_buf.get_range(0, len)?;
+    socket.send_to(data, src)?;
+
+    Ok(packet)
+}
