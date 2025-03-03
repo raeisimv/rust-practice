@@ -141,13 +141,14 @@ impl DnsRecord {
                 ref host,
                 ttl,
             } => {
-                buf.write_qname(&domain)?;
+                buf.write_qname(domain)?;
                 buf.write_u16(QueryType::NS.into())?;
+                buf.write_u16(1)?;
                 buf.write_u32(ttl)?;
 
                 let pos = buf.pos();
                 buf.write_u16(0)?;
-                buf.write_qname(&host)?;
+                buf.write_qname(host)?;
                 let size = buf.pos() - (pos + 2);
                 buf.set_u16(pos, size as u16)?;
             }
@@ -156,13 +157,14 @@ impl DnsRecord {
                 ref host,
                 ttl,
             } => {
-                buf.write_qname(&domain)?;
+                buf.write_qname(domain)?;
                 buf.write_u16(QueryType::CNAME.into())?;
+                buf.write_u16(1)?;
                 buf.write_u32(ttl)?;
 
                 let pos = buf.pos();
                 buf.write_u16(0)?;
-                buf.write_qname(&host)?;
+                buf.write_qname(host)?;
                 let size = buf.pos() - (pos + 2);
                 buf.set_u16(pos, size as u16)?;
             }
@@ -172,14 +174,15 @@ impl DnsRecord {
                 priority,
                 ttl,
             } => {
-                buf.write_qname(&domain)?;
+                buf.write_qname(domain)?;
                 buf.write_u16(QueryType::MX.into())?;
+                buf.write_u16(1)?;
                 buf.write_u32(ttl)?;
 
                 let pos = buf.pos();
                 buf.write_u16(0)?;
                 buf.write_u16(priority)?;
-                buf.write_qname(&host)?;
+                buf.write_qname(host)?;
                 let size = buf.pos() - (pos + 2);
                 buf.set_u16(pos, size as u16)?;
             }
@@ -188,7 +191,7 @@ impl DnsRecord {
                 ref domain,
                 ttl,
             } => {
-                buf.write_qname(&domain)?;
+                buf.write_qname(domain)?;
                 buf.write_u16(QueryType::AAA.into())?;
                 buf.write_u16(1)?;
                 buf.write_u32(ttl)?;
