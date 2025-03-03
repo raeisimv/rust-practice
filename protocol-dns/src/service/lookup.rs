@@ -1,12 +1,13 @@
 use crate::dns::{BytePacketBuffer, DnsPacket, DnsQuestion, QueryType, Result};
+use std::net::Ipv4Addr;
 
-pub fn lookup(qname: &str, qtype: QueryType) -> Result<DnsPacket> {
-    let server = ("8.8.8.8", 53);
+pub fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> Result<DnsPacket> {
     let socket = std::net::UdpSocket::bind(("0.0.0.0", 0))?;
 
     let mut packet = DnsPacket::new();
     packet.header.id = 6868;
     packet.header.recursion_desired = true;
+    packet.header.questions = 1;
     packet.questions.push(DnsQuestion::new(qname.into(), qtype));
 
     let mut buf = BytePacketBuffer::new();
