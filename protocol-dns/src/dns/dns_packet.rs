@@ -80,7 +80,7 @@ impl DnsPacket {
                 DnsRecord::NS { domain, host, .. } => Some((domain.as_str(), host.as_str())),
                 _ => None,
             })
-            .filter(|(domain, _)| qname.starts_with(*domain))
+            .filter(|(domain, _)| qname.ends_with(*domain))
     }
     pub fn get_resolve_ns(&self, qname: &str) -> Option<Ipv4Addr> {
         self.get_ns(qname)
