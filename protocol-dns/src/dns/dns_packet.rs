@@ -77,7 +77,7 @@ impl DnsPacket {
             })
             .next()
     }
-    pub fn get_ns<'a>(&'a self, qname: &'a str) -> impl Iterator<Item = (&'a str, &'a str)> {
+    pub fn get_ns(&self, qname: &'_ str) -> impl Iterator<Item = (&str, &str)> {
         self.authorities
             .iter()
             .filter_map(|x| match x {
@@ -97,7 +97,7 @@ impl DnsPacket {
             .map(|x| *x)
             .next()
     }
-    pub fn get_unresolved_ns<'a>(&'a self, qname: &'a str) -> Option<&'a str> {
+    pub fn get_unresolved_ns(&self, qname: &'_ str) -> Option<&str> {
         self.get_ns(qname).map(|(_, host)| host).next()
     }
 }
