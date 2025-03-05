@@ -8,7 +8,6 @@ pub fn query_handler(socket: &UdpSocket) -> Result<DnsPacket> {
     let (_, src) = socket.recv_from(&mut req_buf.buf)?;
     let mut request = DnsPacket::try_from(&mut req_buf)?;
 
-    println!("query_handler: {}", request.header.id);
     let mut packet = DnsPacket::new();
     packet.header.id = request.header.id;
     packet.header.recursion_desired = true;
@@ -16,22 +15,18 @@ pub fn query_handler(socket: &UdpSocket) -> Result<DnsPacket> {
     packet.header.response = true;
 
     if let Some(question) = request.questions.pop() {
-        println!("question: {question:?}");
         if let Ok(result) = lookup_recursively(&question.name, question.qtype) {
             packet.questions.push(question.clone());
             packet.header.rescode = result.header.rescode;
 
             for r in result.answers {
-                println!("answer: {r:?}");
                 packet.answers.push(r);
             }
             for r in result.authorities {
-                println!("authority: {r:?}");
                 packet.authorities.push(r);
                 break;
             }
             for r in result.resources {
-                println!("resource: {r:?}");
                 packet.resources.push(r);
                 break;
             }
