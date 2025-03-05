@@ -36,6 +36,15 @@ impl TryFrom<&mut BytePacketBuffer> for DnsPacket {
         Ok(result)
     }
 }
+impl TryInto<BytePacketBuffer> for DnsPacket {
+    type Error = Error;
+    fn try_into(mut self) -> Result<BytePacketBuffer, Self::Error> {
+        let mut buf = BytePacketBuffer::new();
+        self.write(&mut buf)?;
+
+        Ok(buf)
+    }
+}
 
 impl DnsPacket {
     pub fn new() -> Self {

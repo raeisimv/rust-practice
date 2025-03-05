@@ -2,7 +2,7 @@ use crate::dns::{BytePacketBuffer, DnsPacket, Result, ResultCode};
 use crate::service::lookup_recursively;
 use std::net::UdpSocket;
 
-pub fn query_handler(socket: &UdpSocket) -> Result<DnsPacket> {
+pub fn query_handler(socket: &UdpSocket) -> Result {
     let mut req_buf = BytePacketBuffer::new();
 
     let (_, src) = socket.recv_from(&mut req_buf.buf)?;
@@ -37,12 +37,8 @@ pub fn query_handler(socket: &UdpSocket) -> Result<DnsPacket> {
         packet.header.rescode = ResultCode::FORMERR;
     }
 
-    let mut res_buf = BytePacketBuffer::new();
-    packet.write(&mut res_buf)?;
+    let buf: BytePacketBuffer = packet.try_into()?;
+    socket.send_to(&buf, src)?;
 
-    let len = res_buf.pos();
-    let data = res_buf.get_range(0, len)?;
-    socket.send_to(data, src)?;
-
-    Ok(packet)
+    Ok(())
 }

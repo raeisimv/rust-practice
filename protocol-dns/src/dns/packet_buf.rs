@@ -1,9 +1,18 @@
 use crate::dns::errors::*;
+use std::ops::Deref;
 
 const MAX_JUMP_ALLOWED: usize = 5;
 pub struct BytePacketBuffer {
     pub buf: [u8; 512],
     pub pos: usize,
+}
+
+impl Deref for BytePacketBuffer {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.buf[..self.pos]
+    }
 }
 
 impl BytePacketBuffer {
