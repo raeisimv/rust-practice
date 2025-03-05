@@ -16,7 +16,7 @@ pub fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> Result<
 
     let mut buf = BytePacketBuffer::new();
     socket.recv(&mut buf.buf)?;
-    let packet = DnsPacket::from_buffer(&mut buf)?;
+    let packet = DnsPacket::try_from(&mut buf)?;
 
     Ok(packet)
 }

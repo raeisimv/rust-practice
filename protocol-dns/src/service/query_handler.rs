@@ -6,7 +6,7 @@ pub fn query_handler(socket: &UdpSocket) -> Result<DnsPacket> {
     let mut req_buf = BytePacketBuffer::new();
 
     let (_, src) = socket.recv_from(&mut req_buf.buf)?;
-    let mut request = DnsPacket::from_buffer(&mut req_buf)?;
+    let mut request = DnsPacket::try_from(&mut req_buf)?;
 
     println!("query_handler: {}", request.header.id);
     let mut packet = DnsPacket::new();

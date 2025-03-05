@@ -1,4 +1,4 @@
-use crate::dns::{BytePacketBuffer, DnsHeader, DnsQuestion, DnsRecord, QueryType, Result};
+use crate::dns::{BytePacketBuffer, DnsHeader, DnsQuestion, DnsRecord, Error, QueryType, Result};
 use std::net::Ipv4Addr;
 
 #[derive(Clone, Debug)]
@@ -10,17 +10,9 @@ pub struct DnsPacket {
     pub resources: Vec<DnsRecord>,
 }
 
-impl DnsPacket {
-    pub fn new() -> Self {
-        Self {
-            header: DnsHeader::new(),
-            questions: vec![],
-            answers: vec![],
-            authorities: vec![],
-            resources: vec![],
-        }
-    }
-    pub fn from_buffer(buf: &mut BytePacketBuffer) -> Result<Self> {
+impl TryFrom<&mut BytePacketBuffer> for DnsPacket {
+    type Error = Error;
+    fn try_from(buf: &mut BytePacketBuffer) -> Result<Self> {
         let mut result = DnsPacket::new();
         result.header.read(buf)?;
 
@@ -42,6 +34,18 @@ impl DnsPacket {
             result.resources.push(resource);
         }
         Ok(result)
+    }
+}
+
+impl DnsPacket {
+    pub fn new() -> Self {
+        Self {
+            header: DnsHeader::new(),
+            questions: vec![],
+            answers: vec![],
+            authorities: vec![],
+            resources: vec![],
+        }
     }
     pub fn write(&mut self, buf: &mut BytePacketBuffer) -> Result {
         self.header.questions = self.questions.len() as u16;
