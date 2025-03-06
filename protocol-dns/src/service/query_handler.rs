@@ -24,11 +24,9 @@ pub fn query_handler(socket: &UdpSocket) -> Result {
             }
             for r in result.authorities {
                 packet.authorities.push(r);
-                break;
             }
             for r in result.resources {
                 packet.resources.push(r);
-                break;
             }
         } else {
             packet.header.rescode = ResultCode::SERVFAIL;
