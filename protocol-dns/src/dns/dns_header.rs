@@ -21,9 +21,8 @@ pub struct DnsHeader {
     pub authoritative_entries: u16,
     pub resource_entries: u16,
 }
-
-impl DnsHeader {
-    pub fn new() -> Self {
+impl Default for DnsHeader {
+    fn default() -> Self {
         Self {
             id: 0,
 
@@ -45,7 +44,8 @@ impl DnsHeader {
             resource_entries: 0,
         }
     }
-
+}
+impl DnsHeader {
     pub fn read(&mut self, buf: &mut BytePacketBuffer) -> Result {
         self.id = buf.read_u16()?;
 

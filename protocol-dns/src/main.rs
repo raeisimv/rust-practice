@@ -12,7 +12,7 @@ fn main() -> Result {
         match query_handler(&socket, ns_addr) {
             Ok(_) => {}
             Err(e) => {
-                eprintln!("error: {e:?}");
+                eprintln!("error in handling the query: {e:?}");
             }
         }
     }

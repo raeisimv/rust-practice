@@ -13,7 +13,7 @@ pub struct DnsPacket {
 impl TryFrom<&mut BytePacketBuffer> for DnsPacket {
     type Error = Error;
     fn try_from(buf: &mut BytePacketBuffer) -> Result<Self> {
-        let mut result = DnsPacket::new();
+        let mut result = DnsPacket::default();
         result.header.read(buf)?;
 
         for _ in 0..result.header.questions {
@@ -46,16 +46,18 @@ impl TryInto<BytePacketBuffer> for DnsPacket {
     }
 }
 
-impl DnsPacket {
-    pub fn new() -> Self {
+impl Default for DnsPacket {
+    fn default() -> Self {
         Self {
-            header: DnsHeader::new(),
+            header: DnsHeader::default(),
             questions: vec![],
             answers: vec![],
             authorities: vec![],
             resources: vec![],
         }
     }
+}
+impl DnsPacket {
     pub fn write(&mut self, buf: &mut BytePacketBuffer) -> Result {
         self.header.questions = self.questions.len() as u16;
         self.header.answers = self.answers.len() as u16;

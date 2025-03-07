@@ -4,7 +4,7 @@ use std::net::Ipv4Addr;
 pub fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> Result<DnsPacket> {
     let socket = std::net::UdpSocket::bind(("0.0.0.0", 0))?;
 
-    let mut packet = DnsPacket::new();
+    let mut packet = DnsPacket::default();
     packet.header.id = 6868;
     packet.header.recursion_desired = true;
     packet.header.questions = 1;

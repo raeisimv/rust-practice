@@ -8,7 +8,7 @@ pub fn query_handler(socket: &UdpSocket, ns_addr: Ipv4Addr) -> Result {
     let (_, src) = socket.recv_from(&mut req_buf.buf)?;
     let mut request = DnsPacket::try_from(&mut req_buf)?;
 
-    let mut packet = DnsPacket::new();
+    let mut packet = DnsPacket::default();
     packet.header.id = request.header.id;
     packet.header.recursion_desired = true;
     packet.header.recursion_available = true;
