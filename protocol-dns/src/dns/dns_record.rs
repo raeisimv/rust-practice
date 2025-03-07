@@ -115,19 +115,15 @@ impl DnsRecord {
     }
     pub fn write(&self, buf: &mut BytePacketBuffer) -> Result<usize> {
         let start_pos = buf.pos();
-        match *self {
+        match self {
             DnsRecord::UNKNOWN { .. } => {
                 println!("skipping writing UNKNOWN DNS Record: {self:?}");
             }
-            DnsRecord::A {
-                ref domain,
-                ref addr,
-                ttl,
-            } => {
+            DnsRecord::A { domain, addr, ttl } => {
                 buf.write_qname(domain)?;
                 buf.write_u16(QueryType::A.into())?;
                 buf.write_u16(1)?;
-                buf.write_u32(ttl)?;
+                buf.write_u32(*ttl)?;
                 buf.write_u16(4)?;
 
                 let octets = addr.octets();
@@ -136,15 +132,11 @@ impl DnsRecord {
                 buf.write_u8(octets[2])?;
                 buf.write_u8(octets[3])?;
             }
-            DnsRecord::NS {
-                ref domain,
-                ref host,
-                ttl,
-            } => {
+            DnsRecord::NS { domain, host, ttl } => {
                 buf.write_qname(domain)?;
                 buf.write_u16(QueryType::NS.into())?;
                 buf.write_u16(1)?;
-                buf.write_u32(ttl)?;
+                buf.write_u32(*ttl)?;
 
                 let pos = buf.pos();
                 buf.write_u16(0)?;
@@ -152,15 +144,11 @@ impl DnsRecord {
                 let size = buf.pos() - (pos + 2);
                 buf.set_u16(pos, size as u16)?;
             }
-            DnsRecord::CNAME {
-                ref domain,
-                ref host,
-                ttl,
-            } => {
+            DnsRecord::CNAME { domain, host, ttl } => {
                 buf.write_qname(domain)?;
                 buf.write_u16(QueryType::CNAME.into())?;
                 buf.write_u16(1)?;
-                buf.write_u32(ttl)?;
+                buf.write_u32(*ttl)?;
 
                 let pos = buf.pos();
                 buf.write_u16(0)?;
@@ -169,32 +157,28 @@ impl DnsRecord {
                 buf.set_u16(pos, size as u16)?;
             }
             DnsRecord::MX {
-                ref domain,
-                ref host,
+                domain,
+                host,
                 priority,
                 ttl,
             } => {
                 buf.write_qname(domain)?;
                 buf.write_u16(QueryType::MX.into())?;
                 buf.write_u16(1)?;
-                buf.write_u32(ttl)?;
+                buf.write_u32(*ttl)?;
 
                 let pos = buf.pos();
                 buf.write_u16(0)?;
-                buf.write_u16(priority)?;
+                buf.write_u16(*priority)?;
                 buf.write_qname(host)?;
                 let size = buf.pos() - (pos + 2);
                 buf.set_u16(pos, size as u16)?;
             }
-            DnsRecord::AAA {
-                ref addr,
-                ref domain,
-                ttl,
-            } => {
+            DnsRecord::AAA { addr, domain, ttl } => {
                 buf.write_qname(domain)?;
                 buf.write_u16(QueryType::AAA.into())?;
                 buf.write_u16(1)?;
-                buf.write_u32(ttl)?;
+                buf.write_u32(*ttl)?;
                 buf.write_u16(16)?;
 
                 for segment in addr.segments() {
