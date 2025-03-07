@@ -1,8 +1,8 @@
 use crate::dns::{BytePacketBuffer, DnsPacket, Result, ResultCode};
 use crate::service::lookup_recursively;
-use std::net::UdpSocket;
+use std::net::{Ipv4Addr, UdpSocket};
 
-pub fn query_handler(socket: &UdpSocket) -> Result {
+pub fn query_handler(socket: &UdpSocket, ns_addr: Ipv4Addr) -> Result {
     let mut req_buf = BytePacketBuffer::new();
 
     let (_, src) = socket.recv_from(&mut req_buf.buf)?;
@@ -15,7 +15,7 @@ pub fn query_handler(socket: &UdpSocket) -> Result {
     packet.header.response = true;
 
     if let Some(question) = request.questions.pop() {
-        if let Ok(result) = lookup_recursively(&question.name, question.qtype) {
+        if let Ok(result) = lookup_recursively(&question.name, question.qtype, ns_addr) {
             packet.questions.push(question.clone());
             packet.header.rescode = result.header.rescode;
 

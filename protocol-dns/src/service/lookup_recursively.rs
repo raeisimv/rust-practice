@@ -2,9 +2,12 @@ use crate::dns::{DnsPacket, QueryType, Result, ResultCode};
 use crate::service::lookup;
 use std::net::Ipv4Addr;
 
-pub fn lookup_recursively(qname: &str, qtype: QueryType) -> Result<DnsPacket> {
-    let mut ns: Ipv4Addr = "198.41.0.4".parse().unwrap();
-
+pub fn lookup_recursively(
+    qname: &str,
+    qtype: QueryType,
+    ns_default: Ipv4Addr,
+) -> Result<DnsPacket> {
+    let mut ns = ns_default.clone();
     loop {
         println!("attempting lookup of {qtype:?} {qname} with ns {ns}");
         let ns_copy = ns;
@@ -21,7 +24,6 @@ pub fn lookup_recursively(qname: &str, qtype: QueryType) -> Result<DnsPacket> {
 
         if let Some(new_ns) = response.get_resolve_ns(qname) {
             ns = new_ns;
-
             continue;
         }
 
@@ -29,7 +31,7 @@ pub fn lookup_recursively(qname: &str, qtype: QueryType) -> Result<DnsPacket> {
             return Ok(response);
         };
 
-        let recursive_response = lookup_recursively(&new_ns_name, QueryType::A)?;
+        let recursive_response = lookup_recursively(&new_ns_name, QueryType::A, ns_default)?;
         if let Some(new_ns) = recursive_response.get_random_a() {
             ns = new_ns;
         } else {
