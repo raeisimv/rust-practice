@@ -1,5 +1,5 @@
 use crate::defs::HandshakeType;
-use crate::ProtocolVersion;
+use crate::{IntoU8, ProtocolVersion};
 
 #[derive(Copy, Clone, Debug)]
 pub struct RecordHeader {
@@ -14,10 +14,10 @@ impl Into<[u8; 5]> for RecordHeader {
         let version: u16 = self.version.into();
 
         v[0] = self.kind.into();
-        v[1] = ((version >> 8) & 0xFF) as u8;
-        v[2] = ((version >> 0) & 0xFF) as u8;
-        v[3] = ((self.size >> 8) & 0xFF) as u8;
-        v[4] = ((self.size >> 0) & 0xFF) as u8;
+        v[1] = version.byte_at(1);
+        v[2] = version.byte_at(0);
+        v[3] = self.size.byte_at(1);
+        v[4] = self.size.byte_at(0);
         v
     }
 }
