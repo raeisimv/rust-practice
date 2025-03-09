@@ -3,7 +3,12 @@
 
 #[derive(Copy, Clone, Debug)]
 pub enum HandshakeType {
-    // Hello messages
+    HelloRequest,
+    ClientHello,
+    ServerHello,
+    HelloVerifyRequest,
+    NewSessionTicket,
+    EndOfEarlyData,
     CertificateStatus,
 
     // Categorize others as unsupported for now
@@ -13,6 +18,12 @@ pub enum HandshakeType {
 impl Into<u8> for HandshakeType {
     fn into(self) -> u8 {
         match self {
+            HandshakeType::HelloRequest => 0x00,
+            HandshakeType::ClientHello => 0x01,
+            HandshakeType::ServerHello => 0x02,
+            HandshakeType::HelloVerifyRequest => 0x03,
+            HandshakeType::NewSessionTicket => 0x04,
+            HandshakeType::EndOfEarlyData => 0x05,
             HandshakeType::CertificateStatus => 0x16,
             HandshakeType::Unsupported(x) => x,
         }
@@ -63,7 +74,7 @@ impl Into<u16> for CipherSuite {
             CipherSuite::TLS_CHACHA20_POLY1305_SHA256 => 0x1303,
             CipherSuite::TLS_AES_128_GCM_SHA256 => 0x1301,
             CipherSuite::TLS_EMPTY_RENEGOTIATION_INFO_SCSV => 0x00ff,
-            CipherSuite::Unsupported(x)=> x
+            CipherSuite::Unsupported(x) => x,
         }
     }
 }
