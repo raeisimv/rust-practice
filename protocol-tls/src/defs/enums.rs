@@ -44,3 +44,26 @@ impl Into<u16> for ProtocolVersion {
         }
     }
 }
+
+#[allow(non_camel_case_types)]
+#[derive(Copy, Clone, Debug)]
+pub enum CipherSuite {
+    TLS_AES_256_GCM_SHA384,
+    TLS_CHACHA20_POLY1305_SHA256,
+    TLS_AES_128_GCM_SHA256,
+    TLS_EMPTY_RENEGOTIATION_INFO_SCSV,
+
+    Unsupported(u16),
+}
+
+impl Into<u16> for CipherSuite {
+    fn into(self) -> u16 {
+        match self {
+            CipherSuite::TLS_AES_256_GCM_SHA384 => 0x1302,
+            CipherSuite::TLS_CHACHA20_POLY1305_SHA256 => 0x1303,
+            CipherSuite::TLS_AES_128_GCM_SHA256 => 0x1301,
+            CipherSuite::TLS_EMPTY_RENEGOTIATION_INFO_SCSV => 0x00ff,
+            CipherSuite::Unsupported(x)=> x
+        }
+    }
+}
