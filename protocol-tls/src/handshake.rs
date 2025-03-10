@@ -1,9 +1,9 @@
 use crate::DecodeError::InvalidMessage;
-use crate::{BufReader, Codec, DecodeError, TlsResult};
+use crate::{BufReader, Codec, DecodeError, IntoU8, TlsResult};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Random {
-    pub buf: [u8; 32],
+    buf: [u8; 32],
 }
 impl Random {
     pub fn new() -> Self {
@@ -18,6 +18,9 @@ impl Random {
         for i in 0..32_usize {
             seed ^= seed.rotate_left(13);
             buf[i] = seed as u8;
+            if buf[i] == 0 {
+                buf[i] = 128;
+            }
         }
         Self { buf }
     }
@@ -43,8 +46,13 @@ impl Codec for Random {
         Ok(Self::from_slice(bytes))
     }
 }
+impl AsRef<[u8]> for Random {
+    fn as_ref(&self) -> &[u8] {
+        &self.buf
+    }
+}
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct SessionId {
     data: [u8; 32],
     size: usize,
@@ -88,5 +96,56 @@ impl Codec for SessionId {
             return Err(InvalidMessage("missing session data".into()));
         };
         Ok(Self::from_slice(data, size as usize))
+    }
+}
+impl AsRef<[u8]> for SessionId {
+    fn as_ref(&self) -> &[u8] {
+        &self.data[..self.size]
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ExtServerName {
+    host: String,
+}
+impl ExtServerName {
+    pub fn from_host(host: String) -> Self {
+        Self { host }
+    }
+}
+impl Codec for ExtServerName {
+    fn encode(&self, buf: &mut Vec<u8>) {
+        buf.extend(&[0x00, 0x00]); // The ext id
+
+        let host = self.host.as_bytes();
+        let host_len = host.len() as u16;
+        let the_list_entry_len = host_len + 3;
+        let the_ext_payload_len = the_list_entry_len + 2;
+
+        // insert the extension's sizes
+        buf.extend([
+            // total and final data that comes along
+            the_ext_payload_len.byte_at(1),
+            the_ext_payload_len.byte_at(0),
+            // the +2 in the above calculation is the count of the following 2 bytes
+            the_list_entry_len.byte_at(1),
+            the_list_entry_len.byte_at(0),
+            // the +3 in above calculation is the count of the following 3 bytes
+            0x00, // DNS Hostname,
+            host_len.byte_at(1),
+            host_len.byte_at(0),
+        ]);
+        buf.extend(host); // the real hostname in bytes
+    }
+
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+        let size = u16::decode(buf)? as usize;
+        let Some(chunk) = buf.take(size) else {
+            return Err(InvalidMessage("missing ext.ServerName chunk".into()));
+        };
+
+        Ok(Self {
+            host: String::from_utf8_lossy(chunk).into(),
+        })
     }
 }
