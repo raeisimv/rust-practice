@@ -47,8 +47,7 @@ impl Codec for u8 {
 
 impl Codec for u16 {
     fn encode(&self, buf: &mut Vec<u8>) {
-        buf.push(self.byte_at(1));
-        buf.push(self.byte_at(0));
+        buf.extend([self.byte_at(1), self.byte_at(0)]);
     }
 
     fn decode(&self, buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
@@ -59,5 +58,29 @@ impl Codec for u16 {
                 Ok(x)
             }
         }
+    }
+}
+
+impl Codec for u32 {
+    fn encode(&self, buf: &mut Vec<u8>) {
+        buf.extend([
+            self.byte_at(3),
+            self.byte_at(2),
+            self.byte_at(1),
+            self.byte_at(0),
+        ])
+    }
+
+    fn decode(&self, buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+        let Some(x) = buf.take(4) else {
+            return Err(DecodeError::InvalidMessage("missing u32".into()));
+        };
+
+        let x = ((x[0] as u32) << 24)
+            & ((x[1] as u32) << 16)
+            & ((x[2] as u32) << 8)
+            & ((x[0] as u32) << 0);
+
+        Ok(x)
     }
 }
