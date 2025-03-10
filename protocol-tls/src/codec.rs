@@ -30,14 +30,14 @@ impl<'a> BufReader<'a> {
 
 pub trait Codec: Debug + Sized {
     fn encode(&self, buf: &mut Vec<u8>);
-    fn decode(&self, buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError>;
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError>;
 }
 
 impl Codec for u8 {
     fn encode(&self, buf: &mut Vec<u8>) {
         buf.push(*self);
     }
-    fn decode(&self, buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
         match buf.take(1) {
             Some(x) => Ok(x[0]),
             _ => Err(DecodeError::InvalidMessage("missing u8".into())),
@@ -50,7 +50,7 @@ impl Codec for u16 {
         buf.extend([self.byte_at(1), self.byte_at(0)]);
     }
 
-    fn decode(&self, buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
         match buf.take(2) {
             None => Err(DecodeError::InvalidMessage("missing u16".into())),
             Some(x) => {
@@ -71,7 +71,7 @@ impl Codec for u32 {
         ])
     }
 
-    fn decode(&self, buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
         let Some(x) = buf.take(4) else {
             return Err(DecodeError::InvalidMessage("missing u32".into()));
         };
