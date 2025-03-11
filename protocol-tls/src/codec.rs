@@ -26,6 +26,10 @@ impl<'a> BufReader<'a> {
 
         Some(taken)
     }
+    pub fn sub(&mut self, size: usize) -> Option<Self> {
+        let buf = self.take(size)?;
+        Some(Self::new(buf))
+    }
 }
 
 pub trait Codec: Debug + Sized {
