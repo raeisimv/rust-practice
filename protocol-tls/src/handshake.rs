@@ -106,6 +106,7 @@ impl AsRef<[u8]> for SessionId {
 
 #[derive(Clone, Debug)]
 pub struct ExtServerName {
+    // typ: 0x00 0x00
     host: String,
 }
 impl ExtServerName {
@@ -147,5 +148,59 @@ impl Codec for ExtServerName {
         Ok(Self {
             host: String::from_utf8_lossy(chunk).into(),
         })
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct ExtKeyShare {
+    // typ: 0x00 0x33
+    // x25519: 0x00 0x1d Curve25519
+    alg: u16,
+    key: [u8; 32],
+}
+impl ExtKeyShare {
+    pub fn new() -> Self {
+        Self {
+            alg: 0x001d,
+            key: Random::new().buf,
+        }
+    }
+}
+impl Codec for ExtKeyShare {
+    fn encode(&self, buf: &mut Vec<u8>) {
+        buf.extend([
+            0x00, 0x33, // id
+            0x00, 0x26, // data len
+            0x00, 0x24, // data len
+        ]);
+        buf.extend([
+            self.alg.byte_at(1),
+            self.alg.byte_at(0),
+            // 0x00, 0x1d, // Curve25519
+        ]);
+        buf.extend([
+            0x00, 0x20, // key len = 32
+        ]);
+        buf.extend(self.key);
+    }
+
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+        let size = u16::decode(buf)? as usize;
+        let Some(mut data) = buf.sub(size) else {
+            return Err(InvalidMessage("missing ExtKeyShare".into()));
+        };
+
+        let size = u16::decode(&mut data)? as usize - 2;
+        let alg = u16::decode(&mut data)?;
+        let Some(key_org) = data.take(size) else {
+            return Err(InvalidMessage("missing ExtKeyShare key".into()));
+        };
+
+        // Copy
+        let mut key = [0; 32];
+        for (i, x) in key_org.iter().enumerate() {
+            key[i] = *x;
+        }
+        Ok(Self { alg, key })
     }
 }
