@@ -186,7 +186,7 @@ impl Codec for ExtKeyShare {
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
         let size = u16::decode(buf)? as usize;
-        let Some(mut data) = buf.sub(size) else {
+        let Ok(mut data) = buf.sub(size) else {
             return Err(InvalidMessage("missing ExtKeyShare".into()));
         };
 

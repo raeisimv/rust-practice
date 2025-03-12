@@ -1,3 +1,4 @@
+use crate::DecodeError::InvalidMessage;
 use crate::{DecodeError, IntoU8, TlsResult};
 use std::fmt::Debug;
 
@@ -26,9 +27,11 @@ impl<'a> BufReader<'a> {
 
         Some(taken)
     }
-    pub fn sub(&mut self, size: usize) -> Option<Self> {
-        let buf = self.take(size)?;
-        Some(Self::new(buf))
+    pub fn sub(&mut self, size: usize) -> TlsResult<Self, DecodeError> {
+        match self.take(size) {
+            Some(x) => Ok(Self::new(x)),
+            None => Err(InvalidMessage("missing sub".into())),
+        }
     }
 }
 
