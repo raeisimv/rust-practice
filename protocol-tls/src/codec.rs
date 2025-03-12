@@ -1,6 +1,6 @@
 use crate::DecodeError::InvalidMessage;
 use crate::{DecodeError, IntoU8, TlsResult};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display, Formatter};
 
 pub struct BufReader<'a> {
     buf: &'a [u8],
@@ -89,5 +89,27 @@ impl Codec for u32 {
             & ((x[0] as u32) << 0);
 
         Ok(x)
+    }
+}
+
+#[allow(non_camel_case_types)]
+#[derive(Copy, Clone, Debug, Default)]
+pub struct u24(pub u32);
+impl Codec for u24 {
+    fn encode(&self, buf: &mut Vec<u8>) {
+        buf.extend(self.0.to_be_bytes().iter().skip(1));
+    }
+
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+        let Some(x) = buf.take(3) else {
+            return Err(InvalidMessage("missing u24".into()));
+        };
+        let x = [0, x[0], x[1], x[2]];
+        Ok(Self(u32::from_be_bytes(x)))
+    }
+}
+impl Display for u24 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
