@@ -1,5 +1,5 @@
 use crate::DecodeError::InvalidMessage;
-use crate::{BufReader, Codec, DecodeError, IntoU8, TlsResult};
+use crate::{BufReader, CipherSuite, Codec, DecodeError, ProtocolVersion, TlsResult};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Random {
@@ -35,7 +35,7 @@ impl Random {
 }
 impl Codec for Random {
     fn encode(&self, buf: &mut Vec<u8>) {
-        buf.extend(self.buf)
+        buf.extend_from_slice(&self.buf)
     }
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
@@ -81,7 +81,7 @@ impl Codec for SessionId {
         assert!(self.size < 32);
         buf.push(self.size as u8);
         if self.size > 0 {
-            buf.extend(&self.data[..self.size])
+            buf.extend_from_slice(&self.data[..self.size])
         }
     }
 
@@ -116,7 +116,7 @@ impl ExtServerName {
 }
 impl Codec for ExtServerName {
     fn encode(&self, buf: &mut Vec<u8>) {
-        buf.extend(&[0x00, 0x00]); // The ext id
+        buf.extend_from_slice(&[0x00, 0x00]); // The ext id
 
         let host = self.host.as_bytes();
         let host_len = host.len() as u16;
@@ -124,19 +124,17 @@ impl Codec for ExtServerName {
         let the_ext_payload_len = the_list_entry_len + 2;
 
         // insert the extension's sizes
-        buf.extend([
-            // total and final data that comes along
-            the_ext_payload_len.byte_at(1),
-            the_ext_payload_len.byte_at(0),
-            // the +2 in the above calculation is the count of the following 2 bytes
-            the_list_entry_len.byte_at(1),
-            the_list_entry_len.byte_at(0),
-            // the +3 in above calculation is the count of the following 3 bytes
-            0x00, // DNS Hostname,
-            host_len.byte_at(1),
-            host_len.byte_at(0),
-        ]);
-        buf.extend(host); // the real hostname in bytes
+        // total and final data that comes along
+        buf.extend_from_slice(&the_ext_payload_len.to_be_bytes());
+        // the +2 in the above calculation is the count of the following 2 bytes
+        buf.extend_from_slice(&the_list_entry_len.to_be_bytes());
+
+        // the +3 in above calculation is the count of the following 3 bytes
+        buf.extend_from_slice(&[0x00]); // DNS Hostname,
+        buf.extend_from_slice(&host_len.to_be_bytes());
+
+        // the real hostname in bytes
+        buf.extend_from_slice(host);
     }
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
@@ -161,27 +159,21 @@ pub struct ExtKeyShare {
 impl ExtKeyShare {
     pub fn new() -> Self {
         Self {
-            alg: 0x001d,
+            alg: 0x001d, // Curve25519
             key: Random::new().buf,
         }
     }
 }
 impl Codec for ExtKeyShare {
     fn encode(&self, buf: &mut Vec<u8>) {
-        buf.extend([
+        buf.extend_from_slice(&[
             0x00, 0x33, // id
             0x00, 0x26, // data len
             0x00, 0x24, // data len
         ]);
-        buf.extend([
-            self.alg.byte_at(1),
-            self.alg.byte_at(0),
-            // 0x00, 0x1d, // Curve25519
-        ]);
-        buf.extend([
-            0x00, 0x20, // key len = 32
-        ]);
-        buf.extend(self.key);
+        buf.extend_from_slice(&self.alg.to_be_bytes());
+        buf.extend_from_slice(&[0x00, 0x20]); // key len = 32
+        buf.extend_from_slice(&self.key);
     }
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
@@ -203,4 +195,13 @@ impl Codec for ExtKeyShare {
         }
         Ok(Self { alg, key })
     }
+}
+
+pub struct ClientHello {
+    client_version: ProtocolVersion,
+    random: Random,
+    session_id: SessionId,
+    cipher_suite: Vec<CipherSuite>,
+    compression_method: u16,
+    extensions: Vec<u8>,
 }

@@ -1,5 +1,5 @@
 use crate::DecodeError::InvalidMessage;
-use crate::{DecodeError, IntoU8, TlsResult};
+use crate::{DecodeError, TlsResult};
 use std::fmt::{Debug, Display, Formatter};
 
 pub struct BufReader<'a> {
@@ -54,7 +54,7 @@ impl Codec for u8 {
 
 impl Codec for u16 {
     fn encode(&self, buf: &mut Vec<u8>) {
-        buf.extend([self.byte_at(1), self.byte_at(0)]);
+        buf.extend_from_slice(&self.to_be_bytes());
     }
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
@@ -70,12 +70,7 @@ impl Codec for u16 {
 
 impl Codec for u32 {
     fn encode(&self, buf: &mut Vec<u8>) {
-        buf.extend([
-            self.byte_at(3),
-            self.byte_at(2),
-            self.byte_at(1),
-            self.byte_at(0),
-        ])
+        buf.extend_from_slice(&self.to_be_bytes())
     }
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {

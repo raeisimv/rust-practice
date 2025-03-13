@@ -7,4 +7,5 @@ pub type TlsResult<T = (), E = TlsError> = Result<T, E>;
 #[derive(Clone, Debug)]
 pub enum DecodeError {
     InvalidMessage(String),
+    InvalidConversion(String),
 }
