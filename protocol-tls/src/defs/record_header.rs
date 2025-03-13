@@ -11,7 +11,7 @@ pub struct RecordHeader {
 impl Into<[u8; 5]> for RecordHeader {
     fn into(self) -> [u8; 5] {
         let mut v = [0; 5];
-        let version: u16 = self.version.into();
+        let version: u16 = self.version as _;
 
         v[0] = self.kind.into();
         v[1] = version.byte_at(1);
