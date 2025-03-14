@@ -119,3 +119,38 @@ impl Display for u24 {
         write!(f, "{}", self.0)
     }
 }
+
+#[derive(Copy, Clone, Debug)]
+pub enum ListLength {
+    U8,
+    U16,
+    U24,
+}
+pub fn extend_with_prefix_length<F>(size: ListLength, buf: &mut Vec<u8>, appender: F)
+where
+    F: FnOnce(&mut Vec<u8>),
+{
+    let offset = buf.len();
+    match size {
+        ListLength::U8 => buf.extend_from_slice(&[0xFF]),
+        ListLength::U16 => buf.extend_from_slice(&[0xFF, 0xFF]),
+        ListLength::U24 => buf.extend_from_slice(&[0xFF, 0xFF, 0xFF]),
+    }
+
+    appender(buf);
+
+    match size {
+        ListLength::U8 => {
+            let len = buf.len() - offset - 1;
+            buf[offset] = len as u8;
+        }
+        ListLength::U16 => {
+            let len = buf.len() - offset - 2;
+            buf.splice(offset.., (len as u16).to_be_bytes());
+        }
+        ListLength::U24 => {
+            let len = u24((buf.len() - offset - 3) as u32);
+            buf.splice(offset.., len.to_be_bytes());
+        }
+    }
+}
