@@ -90,6 +90,17 @@ impl Codec for u32 {
 #[allow(non_camel_case_types)]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct u24(pub u32);
+impl u24 {
+    pub fn to_be_bytes(&self) -> [u8; 3] {
+        let it = self.0.to_be_bytes();
+        let mut bytes = [0; 3];
+        for (i, x) in it.iter().skip(1).enumerate() {
+            bytes[i] = *x;
+        }
+        bytes
+    }
+}
+
 impl Codec for u24 {
     fn encode(&self, buf: &mut Vec<u8>) {
         buf.extend(self.0.to_be_bytes().iter().skip(1));
