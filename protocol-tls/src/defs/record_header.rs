@@ -1,5 +1,5 @@
+use crate::HandshakeType;
 use crate::ProtocolVersion;
-use crate::defs::HandshakeType;
 
 #[derive(Copy, Clone, Debug)]
 pub struct RecordHeader {
