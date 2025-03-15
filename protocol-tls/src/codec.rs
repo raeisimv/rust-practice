@@ -154,3 +154,33 @@ where
         }
     }
 }
+
+pub trait TlsListElement {
+    const SIZE_LEN: ListLength;
+}
+
+impl<T: Codec + TlsListElement> Codec for Vec<T> {
+    fn encode(&self, buf: &mut Vec<u8>) {
+        extend_with_prefix_length(T::SIZE_LEN, buf, |buf| {
+            for x in self {
+                x.encode(buf);
+            }
+        })
+    }
+
+    fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
+        let len = match T::SIZE_LEN {
+            ListLength::U8 => u8::decode(buf)? as usize,
+            ListLength::U16 => u16::decode(buf)? as usize,
+            ListLength::U24 => u24::decode(buf)?.0 as usize,
+        };
+        let mut sub = buf.sub(len)?;
+        let mut ret = Self::new();
+        while sub.left() > 0 {
+            let x = T::decode(&mut sub)?;
+            ret.push(x);
+        }
+
+        Ok(ret)
+    }
+}
