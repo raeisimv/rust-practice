@@ -1,11 +1,12 @@
 macro_rules! enum_builder {
     (
         #[repr($typ:ty)]
+        $( #[$meta:meta] )*
         $access:vis enum $name:ident {
             $( $arm:ident => $val:literal ),* $(,)?
         }
     ) => {
-        #[allow(non_camel_case_types)]
+        $( #[$meta] )*
         #[derive(Clone,Copy, Eq, PartialEq, Debug)]
         $access enum $name {
             $($arm,)*

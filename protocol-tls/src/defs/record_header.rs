@@ -10,7 +10,7 @@ pub struct RecordHeader {
 
 impl Into<[u8; 5]> for RecordHeader {
     fn into(self) -> [u8; 5] {
-        let version = (self.version as u16).to_be_bytes();
+        let version = u16::from(self.version).to_be_bytes();
         let size = self.size.to_be_bytes();
         [self.kind.into(), version[0], version[1], size[0], size[1]]
     }
