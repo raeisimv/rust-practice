@@ -32,6 +32,7 @@ impl Into<u8> for HandshakeType {
 
 enum_builder! {
     #[repr(u16)]
+    #[derive(Clone,Copy, Eq, PartialEq, Debug)]
     pub enum ProtocolVersion {
         SSLv2 => 0x0002,
         SSLv3 => 0x0300,
@@ -48,6 +49,7 @@ enum_builder! {
 enum_builder! {
     #[repr(u16)]
     #[allow(non_camel_case_types)]
+    #[derive(Clone,Copy, Eq, PartialEq, Debug)]
     pub enum CipherSuite {
         TLS_AES_256_GCM_SHA384  => 0x1302,
         TLS_CHACHA20_POLY1305_SHA256 => 0x1303,

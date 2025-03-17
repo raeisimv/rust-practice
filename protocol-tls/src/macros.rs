@@ -7,7 +7,6 @@ macro_rules! enum_builder {
         }
     ) => {
         $( #[$meta] )*
-        #[derive(Clone,Copy, Eq, PartialEq, Debug)]
         $access enum $name {
             $($arm,)*
              Unknown($typ)
