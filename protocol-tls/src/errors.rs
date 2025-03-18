@@ -8,4 +8,5 @@ pub type TlsResult<T = (), E = TlsError> = Result<T, E>;
 pub enum DecodeError {
     InvalidMessage(String),
     InvalidConversion(String),
+    CryptoError(String),
 }
