@@ -74,3 +74,32 @@ enum_builder! {
         KeyShare => 0x0033,
     }
 }
+
+enum_builder! {
+    #[repr(u16)]
+    #[derive(Clone, Copy, Debug)]
+    pub enum NamedGroup {
+        X25519 => 0x001d,
+    }
+}
+
+enum_builder! {
+    #[repr(u16)]
+     #[allow(non_camel_case_types)]
+    #[derive(Clone,Copy, Eq, PartialEq, Debug)]
+    pub enum SignatureScheme {
+        RSA_PKCS1_SHA1 => 0x0201,
+        ECDSA_SHA1_Legacy => 0x0203,
+        RSA_PKCS1_SHA256 => 0x0401,
+        ECDSA_NISTP256_SHA256 => 0x0403,
+        RSA_PKCS1_SHA384 => 0x0501,
+        ECDSA_NISTP384_SHA384 => 0x0503,
+        RSA_PKCS1_SHA512 => 0x0601,
+        ECDSA_NISTP521_SHA512 => 0x0603,
+        RSA_PSS_SHA256 => 0x0804,
+        RSA_PSS_SHA384 => 0x0805,
+        RSA_PSS_SHA512 => 0x0806,
+        ED25519 => 0x0807,
+        ED448 => 0x0808,
+    }
+}
