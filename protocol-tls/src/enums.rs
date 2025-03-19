@@ -57,3 +57,20 @@ enum_builder! {
         TLS_EMPTY_RENEGOTIATION_INFO_SCSV => 0x00ff,
     }
 }
+
+enum_builder! {
+    #[repr(u16)]
+    #[derive(Clone, Copy, Debug)]
+    pub enum ExtensionType {
+        ServerName => 0x0000,
+        ECPointFormats => 0x000b,
+        EllipticCurves => 0x000a,
+        SessionTicket => 0x0023,
+        EncryptThenMAC => 0x0016,
+        ExtendedMasterSecret => 0x0017,
+        SignatureAlgorithms => 0x000d,
+        SupportedVersions => 0x002b,
+        PSKKeyExchangeModes => 0x002d,
+        KeyShare => 0x0033,
+    }
+}
