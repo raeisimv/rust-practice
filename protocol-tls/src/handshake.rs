@@ -1,5 +1,8 @@
 use crate::DecodeError::InvalidMessage;
-use crate::{BufReader, CipherSuite, Codec, DecodeError, ProtocolVersion, TlsResult};
+use crate::{
+    extend_with_prefix_length, BufReader, Codec, DecodeError, ExtensionType, ListLength, NamedGroup,
+    ProtocolVersion, TlsResult,
+};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Random {
@@ -7,6 +10,9 @@ pub struct Random {
 }
 impl Random {
     pub fn new() -> Self {
+        Self::fixed()
+    }
+    pub fn new_random() -> Self {
         use std::time::SystemTime;
         use std::time::UNIX_EPOCH;
         let mut seed = SystemTime::now()
@@ -32,7 +38,18 @@ impl Random {
 
         Self { buf }
     }
+
+    pub const fn fixed() -> Self {
+        Self {
+            buf: [
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+                0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B,
+                0x1C, 0x1D, 0x1E, 0x1F,
+            ],
+        }
+    }
 }
+
 impl Codec for Random {
     fn encode(&self, buf: &mut Vec<u8>) {
         buf.extend_from_slice(&self.buf)
@@ -78,7 +95,7 @@ impl SessionId {
 }
 impl Codec for SessionId {
     fn encode(&self, buf: &mut Vec<u8>) {
-        assert!(self.size < 32);
+        assert!(self.size <= 32);
         buf.push(self.size as u8);
         if self.size > 0 {
             buf.extend_from_slice(&self.data[..self.size])
@@ -197,11 +214,80 @@ impl Codec for ExtKeyShare {
     }
 }
 
-pub struct ClientHello {
-    client_version: ProtocolVersion,
-    random: Random,
-    session_id: SessionId,
-    cipher_suite: Vec<CipherSuite>,
-    compression_method: u16,
-    extensions: Vec<u8>,
+pub fn create_client_hello(host: String, pub_key: &[u8]) -> Vec<u8> {
+    let session_id = SessionId::random();
+    let handshake = {
+        let mut buf = Vec::new();
+
+        // version
+        buf.extend_from_slice(&u16::from(ProtocolVersion::TLSv1_2).to_be_bytes());
+        // random
+        buf.extend_from_slice(Random::new().as_ref());
+        // session id
+        // buf.push(0x00); // empty session id
+        extend_with_prefix_length(ListLength::U8, &mut buf, |buf| {
+            session_id.encode(buf);
+        });
+        // cipher suite
+        buf.extend_from_slice(&[0x00, 0x02, 0x13, 0x01]); // cipher suites: TLS_AES_128_GCM_SHA256])
+        // extend_with_prefix_length(ListLength::U16, &mut buf, |buf| {
+        //    // buf.extend_from_slice(&[0x13, 0x01]);
+        //     buf.extend_from_slice(&u16::from(CipherSuite::TLS_AES_128_GCM_SHA256).to_be_bytes());
+        // });
+        // compression
+        buf.extend_from_slice(&[0x01, 0x00]);
+
+        // extensions
+        let ext_buf = create_client_hello_ext(host, pub_key);
+        buf.extend_from_slice(&(ext_buf.len() as u16).to_be_bytes());
+        buf.extend_from_slice(&ext_buf);
+
+        buf
+    };
+
+    let pyl_size = handshake.len() as u16;
+    let mut buf = Vec::new();
+    buf.extend_from_slice(&[0x16, 0x03, 0x03]); // ClientHello
+    buf.extend_from_slice(&(pyl_size + 4).to_be_bytes());
+    buf.extend_from_slice(&[0x01, 0x00]); // handshake
+    buf.extend_from_slice(&(pyl_size).to_be_bytes());
+    buf.extend_from_slice(&handshake);
+
+    buf
+}
+
+fn create_client_hello_ext(host: String, pub_key: &[u8]) -> Vec<u8> {
+    let mut buf = Vec::new();
+
+    // add ServerNam
+    ExtServerName::from_host(host).encode(&mut buf);
+
+    // ext EllipticCurves -> NamedGroup -> Groups
+    // add_extension(0x0a, &[0x00, 0x02, 0x00, 0x1d], &mut buf);
+    let pyl = u16::from(NamedGroup::X25519).to_be_bytes();
+    add_extension(ExtensionType::EllipticCurves.into(), &pyl, &mut buf);
+
+    // ext SignatureAlgorithm
+    let pyl = [
+        0x04, 0x03, 0x08, 0x04, 0x04, 0x01, 0x05, 0x03, 0x08, 0x05, 0x05, 0x01, 0x08, 0x06, 0x06,
+        0x01, 0x02, 0x01,
+    ]; // TODO: remove hardcoded values
+    add_extension(ExtensionType::SignatureAlgorithms.into(), &pyl, &mut buf);
+
+    add_extension(ExtensionType::KeyShare.into(), pub_key, &mut buf);
+
+    let pyl = [0x01];
+    add_extension(ExtensionType::PSKKeyExchangeModes.into(), &pyl, &mut buf);
+
+    let pyl = u16::from(ProtocolVersion::TLSv1_3).to_be_bytes();
+    add_extension(ExtensionType::SupportedVersions.into(), &pyl, &mut buf);
+
+    buf
+}
+
+fn add_extension(id: u16, v: &[u8], buf: &mut Vec<u8>) {
+    let len = v.len() as u16;
+    buf.extend_from_slice(&id.to_be_bytes());
+    buf.extend_from_slice(&len.to_be_bytes());
+    buf.extend_from_slice(v);
 }
