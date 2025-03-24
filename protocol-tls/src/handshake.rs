@@ -215,6 +215,7 @@ impl Codec for ExtKeyShare {
 }
 
 pub fn create_client_hello(host: String, pub_key: &[u8]) -> Vec<u8> {
+    let ver = u16::from(ProtocolVersion::TLSv1_0).to_be_bytes();
     let session_id = SessionId::random();
     let handshake = {
         let mut buf = Vec::new();
@@ -247,10 +248,11 @@ pub fn create_client_hello(host: String, pub_key: &[u8]) -> Vec<u8> {
 
     let pyl_size = handshake.len() as u16;
     let mut buf = Vec::new();
-    buf.extend_from_slice(&[0x16, 0x03, 0x03]); // ClientHello
+    buf.extend_from_slice(&[0x16]); // ClientHello
+    buf.extend_from_slice(&ver); // version
     buf.extend_from_slice(&(pyl_size + 4).to_be_bytes());
     buf.extend_from_slice(&[0x01, 0x00]); // handshake
-    buf.extend_from_slice(&(pyl_size).to_be_bytes());
+    buf.extend_from_slice(&pyl_size.to_be_bytes());
     buf.extend_from_slice(&handshake);
 
     buf
@@ -279,7 +281,7 @@ fn create_client_hello_ext(host: String, pub_key: &[u8]) -> Vec<u8> {
     let pyl = [0x01];
     add_extension(ExtensionType::PSKKeyExchangeModes.into(), &pyl, &mut buf);
 
-    let pyl = u16::from(ProtocolVersion::TLSv1_3).to_be_bytes();
+    let pyl = u16::from(ProtocolVersion::TLSv1_0).to_be_bytes();
     add_extension(ExtensionType::SupportedVersions.into(), &pyl, &mut buf);
 
     buf
