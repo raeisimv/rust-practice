@@ -1,32 +1,16 @@
 // A full definitions of these enums can be found at:
 // https://github.com/rustls/rustls/blob/5860d10317528e4f162db6e26c74f81575c51403/rustls/src/enums.rs
-
-#[derive(Copy, Clone, Debug)]
-pub enum HandshakeType {
-    HelloRequest,
-    ClientHello,
-    ServerHello,
-    HelloVerifyRequest,
-    NewSessionTicket,
-    EndOfEarlyData,
-    CertificateStatus,
-
-    // Categorize others as unsupported for now
-    Unsupported(u8),
-}
-
-impl Into<u8> for HandshakeType {
-    fn into(self) -> u8 {
-        match self {
-            HandshakeType::HelloRequest => 0x00,
-            HandshakeType::ClientHello => 0x01,
-            HandshakeType::ServerHello => 0x02,
-            HandshakeType::HelloVerifyRequest => 0x03,
-            HandshakeType::NewSessionTicket => 0x04,
-            HandshakeType::EndOfEarlyData => 0x05,
-            HandshakeType::CertificateStatus => 0x16,
-            HandshakeType::Unsupported(x) => x,
-        }
+enum_builder! {
+    #[repr(u8)]
+    #[derive(Copy, Clone, Debug)]
+    pub enum HandshakeType {
+        HelloRequest  => 0x00,
+        ClientHello=> 0x01,
+        ServerHello => 0x02,
+        HelloVerifyRequest => 0x03,
+        NewSessionTicket => 0x04,
+        EndOfEarlyData => 0x05,
+        CertificateStatus => 0x16,
     }
 }
 
