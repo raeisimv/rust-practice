@@ -69,7 +69,7 @@ enum_builder! {
 
 enum_builder! {
     #[repr(u16)]
-     #[allow(non_camel_case_types)]
+    #[allow(non_camel_case_types)]
     #[derive(Clone,Copy, Eq, PartialEq, Debug)]
     pub enum SignatureScheme {
         RSA_PKCS1_SHA1 => 0x0201,

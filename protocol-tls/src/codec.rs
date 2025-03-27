@@ -47,7 +47,7 @@ impl Codec for u8 {
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
         match buf.take(1) {
             Some(x) => Ok(x[0]),
-            _ => Err(DecodeError::InvalidMessage("missing u8".into())),
+            _ => Err(InvalidMessage("missing u8".into())),
         }
     }
 }
@@ -59,7 +59,7 @@ impl Codec for u16 {
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
         match buf.take(2) {
-            None => Err(DecodeError::InvalidMessage("missing u16".into())),
+            None => Err(InvalidMessage("missing u16".into())),
             Some(x) => {
                 let x = ((x[0] as u16) << 8) & (x[1] as u16);
                 Ok(x)
@@ -75,7 +75,7 @@ impl Codec for u32 {
 
     fn decode(buf: &mut BufReader<'_>) -> TlsResult<Self, DecodeError> {
         let Some(x) = buf.take(4) else {
-            return Err(DecodeError::InvalidMessage("missing u32".into()));
+            return Err(InvalidMessage("missing u32".into()));
         };
 
         let x = ((x[0] as u32) << 24)
