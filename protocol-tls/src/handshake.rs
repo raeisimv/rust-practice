@@ -1,7 +1,7 @@
 use crate::DecodeError::InvalidMessage;
 use crate::{
-    extend_with_prefix_length, BufReader, Codec, DecodeError, ExtensionType, ListLength, NamedGroup,
-    ProtocolVersion, TlsResult,
+    BufReader, Codec, DecodeError, ExtensionType, ListLength, NamedGroup, ProtocolVersion,
+    TlsResult, create_random_u8_32, extend_with_prefix_length,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -13,22 +13,9 @@ impl Random {
         Self::fixed()
     }
     pub fn new_random() -> Self {
-        use std::time::SystemTime;
-        use std::time::UNIX_EPOCH;
-        let mut seed = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_nanos();
-
-        let mut buf = [0_u8; 32];
-        for i in 0..32_usize {
-            seed ^= seed.rotate_left(13);
-            buf[i] = seed as u8;
-            if buf[i] == 0 {
-                buf[i] = 128;
-            }
+        Self {
+            buf: create_random_u8_32(),
         }
-        Self { buf }
     }
     pub fn from_slice(v: &[u8]) -> Self {
         let mut buf = [0; 32];
@@ -77,7 +64,7 @@ pub struct SessionId {
 impl SessionId {
     pub fn random() -> Self {
         Self {
-            data: Random::new().buf,
+            data: create_random_u8_32(),
             size: 32,
         }
     }

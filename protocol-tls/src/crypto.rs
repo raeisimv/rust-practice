@@ -37,3 +37,23 @@ pub fn generate_peer_key(
 
     Ok(())
 }
+
+pub fn create_random_u8_32() -> [u8; 32] {
+    use std::time::SystemTime;
+    use std::time::UNIX_EPOCH;
+    let mut seed = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+
+    let mut buf = [0_u8; 32];
+    for i in 0..32_usize {
+        seed ^= seed.rotate_left(13);
+        buf[i] = seed as u8;
+        if buf[i] == 0 {
+            buf[i] = 128;
+        }
+    }
+
+    buf
+}
