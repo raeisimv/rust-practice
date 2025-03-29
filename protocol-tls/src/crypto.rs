@@ -6,7 +6,7 @@ use ring::{agreement, rand};
 // https://docs.rs/ring/latest/ring/agreement/index.html
 pub fn create_paired_keys() -> TlsResult<(EphemeralPrivateKey, PublicKey), DecodeError> {
     let rnd = rand::SystemRandom::new();
-    let priv_key = agreement::EphemeralPrivateKey::generate(&agreement::X25519, &rnd)
+    let priv_key = EphemeralPrivateKey::generate(&agreement::X25519, &rnd)
         .map_err(|_x| CryptoError("cannot generate agreement of X25519".into()))?;
     let pub_key = priv_key
         .compute_public_key()
