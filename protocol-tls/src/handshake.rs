@@ -1,7 +1,7 @@
 use crate::DecodeError::InvalidMessage;
 use crate::{
-    BufReader, Codec, DecodeError, ExtensionType, ListLength, NamedGroup, ProtocolVersion,
-    TlsResult, create_random_u8_32, extend_with_prefix_length,
+    create_random_u8_32, extend_with_prefix_length, BufReader, Codec, DecodeError, ExtensionType, ListLength,
+    NamedGroup, ProtocolVersion, TlsResult,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -290,4 +290,31 @@ fn add_extension(id: u16, v: &[u8], buf: &mut Vec<u8>) {
     buf.extend_from_slice(&id.to_be_bytes());
     buf.extend_from_slice(&len.to_be_bytes());
     buf.extend_from_slice(v);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn should_encode_ext_server_name() {
+        let host = "example.ulfheim.net";
+        let mut buf = Vec::new();
+        ExtServerName::from_host(host.into()).encode(&mut buf);
+
+        assert_eq!(
+            buf,
+            &[
+                0x0, 0x0, // ext ID
+                0x00, 0x18, // total ext length
+                0x00, 0x16, // first entry length (and only)
+                0x00, // DNS Host name (sni)
+                0x00, 0x13, // entry length
+                // actual SNI (domain name)
+                0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e, 0x75, 0x6c, 0x66, 0x68, 0x65, 0x69,
+                0x6d, 0x2e, 0x6e, 0x65, 0x74
+            ]
+        );
+        assert!(buf.iter().skip(9).eq(host.as_bytes()));
+    }
 }
