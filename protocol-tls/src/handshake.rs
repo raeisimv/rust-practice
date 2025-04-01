@@ -213,8 +213,8 @@ impl Codec for ExtKeyShare {
 }
 
 pub fn create_client_hello(host: String, pub_key: &[u8]) -> Vec<u8> {
-    let ver = u16::from(ProtocolVersion::TLSv1_0).to_be_bytes();
-    let session_id = SessionId::random();
+    let ver = u16::from(ProtocolVersion::TLSv1_2).to_be_bytes();
+    let session_id = SessionId::fixed();
     let handshake = {
         let mut buf = Vec::new();
 
@@ -223,12 +223,14 @@ pub fn create_client_hello(host: String, pub_key: &[u8]) -> Vec<u8> {
         // random
         buf.extend_from_slice(Random::new().as_ref());
         // session id
-        // buf.push(0x00); // empty session id
-        extend_with_prefix_length(ListLength::U8, &mut buf, |buf| {
-            session_id.encode(buf);
-        });
+        buf.push(0x00); // empty session id
+        // extend_with_prefix_length(ListLength::U8, &mut buf, |buf| {
+        //     session_id.encode(buf);
+        // });
         // cipher suite
-        buf.extend_from_slice(&[0x00, 0x02, 0x13, 0x01]); // cipher suites: TLS_AES_128_GCM_SHA256])
+        // buf.extend_from_slice(&[0x00, 0x02, 0x13, 0x01]); // cipher suites: TLS_AES_128_GCM_SHA256
+        buf.extend_from_slice(&[0x00, 0x08, 0x13, 0x02, 0x13, 0x03, 0x13, 0x01, 0x00, 0xff]); // cipher suites
+
         // extend_with_prefix_length(ListLength::U16, &mut buf, |buf| {
         //    // buf.extend_from_slice(&[0x13, 0x01]);
         //     buf.extend_from_slice(&u16::from(CipherSuite::TLS_AES_128_GCM_SHA256).to_be_bytes());
