@@ -261,26 +261,26 @@ fn create_client_hello_ext(host: String, pub_key: &[u8]) -> Vec<u8> {
 
     // add ServerNam
     ExtServerName::from_host(host).encode(&mut buf);
-
-    // ext EllipticCurves -> NamedGroup -> Groups
-    // add_extension(0x0a, &[0x00, 0x02, 0x00, 0x1d], &mut buf);
-    let pyl = u16::from(NamedGroup::X25519).to_be_bytes();
-    add_extension(ExtensionType::EllipticCurves.into(), &pyl, &mut buf);
-
-    // ext SignatureAlgorithm
-    let pyl = [
-        0x04, 0x03, 0x08, 0x04, 0x04, 0x01, 0x05, 0x03, 0x08, 0x05, 0x05, 0x01, 0x08, 0x06, 0x06,
-        0x01, 0x02, 0x01,
-    ]; // TODO: remove hardcoded values
-    add_extension(ExtensionType::SignatureAlgorithms.into(), &pyl, &mut buf);
-
-    add_extension(ExtensionType::KeyShare.into(), pub_key, &mut buf);
-
-    let pyl = [0x01];
-    add_extension(ExtensionType::PSKKeyExchangeModes.into(), &pyl, &mut buf);
-
-    let pyl = u16::from(ProtocolVersion::TLSv1_0).to_be_bytes();
-    add_extension(ExtensionType::SupportedVersions.into(), &pyl, &mut buf);
+    //
+    // // ext EllipticCurves -> NamedGroup -> Groups
+    // // add_extension(0x0a, &[0x00, 0x02, 0x00, 0x1d], &mut buf);
+    // let pyl = u16::from(NamedGroup::X25519).to_be_bytes();
+    // add_extension(ExtensionType::EllipticCurves.into(), &pyl, &mut buf);
+    //
+    // // ext SignatureAlgorithm
+    // let pyl = [
+    //     0x04, 0x03, 0x08, 0x04, 0x04, 0x01, 0x05, 0x03, 0x08, 0x05, 0x05, 0x01, 0x08, 0x06, 0x06,
+    //     0x01, 0x02, 0x01,
+    // ]; // TODO: remove hardcoded values
+    // add_extension(ExtensionType::SignatureAlgorithms.into(), &pyl, &mut buf);
+    //
+    // add_extension(ExtensionType::KeyShare.into(), pub_key, &mut buf);
+    //
+    // let pyl = [0x01];
+    // add_extension(ExtensionType::PSKKeyExchangeModes.into(), &pyl, &mut buf);
+    //
+    // let pyl = u16::from(ProtocolVersion::TLSv1_0).to_be_bytes();
+    // add_extension(ExtensionType::SupportedVersions.into(), &pyl, &mut buf);
 
     buf
 }
