@@ -27,6 +27,7 @@ impl<'a> BufReader<'a> {
 
         Some(taken)
     }
+    /// Take a sub-buffer with specified size
     pub fn sub(&mut self, size: usize) -> TlsResult<Self, DecodeError> {
         match self.take(size) {
             Some(x) => Ok(Self::new(x)),
