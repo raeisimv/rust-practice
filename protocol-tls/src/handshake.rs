@@ -1,8 +1,5 @@
 use crate::DecodeError::InvalidMessage;
-use crate::{
-    create_random_u8_32, extend_with_prefix_length, BufReader, Codec, DecodeError, ExtensionType, ListLength,
-    NamedGroup, ProtocolVersion, TlsResult,
-};
+use crate::{BufReader, Codec, DecodeError, ProtocolVersion, TlsResult, create_random_u8_32};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Random {

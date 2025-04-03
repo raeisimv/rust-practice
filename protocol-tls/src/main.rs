@@ -1,22 +1,24 @@
-use protocol_tls::{TlsResult, create_client_hello, create_paired_keys};
+use protocol_tls::{create_client_hello, create_paired_keys, TlsResult};
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
-const HOST: &str = "jvns.ca";
+const HOST: &str = "cloudflare.com";
 
 fn main() -> TlsResult {
     let (_priv_key, pub_key) = create_paired_keys().expect("failed to create paired keys");
 
-    let pyl = create_client_hello(HOST.into(), pub_key.as_ref());
-    println!("pyl: {:?}", pyl);
+    let key = pub_key; //[32; 0];
+    let pyl = create_client_hello(HOST.into(), key.as_ref());
+    // let pyl = create_client_hello(HOST.into(), pub_key.as_ref());
+    println!("pyl: {:0>2X?}", pyl);
 
-    let mut stream = TcpStream::connect("jvns.ca:443").expect("failed tcp stream");
+    let mut stream = TcpStream::connect(format!("{HOST}:443")).expect("failed tcp stream");
     stream.write_all(&pyl).expect("failed to write_all");
 
     let mut buf = [0_u8; 512];
     let cnt = stream.read(&mut buf).expect("failed to read");
     let buf = &buf[..cnt];
-    println!("received: {buf:x?}");
+    println!("received: {buf:0>2X?}");
     // let str = String::from_utf8_lossy(&buf);
     // println!("received: {str}");
     Ok(())
