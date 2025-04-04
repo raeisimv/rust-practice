@@ -1,4 +1,4 @@
-use crate::dns::{BytePacketBuffer, Result, ResultCode};
+use crate::dns::{BytePacketBuffer, DnsResult, ResultCode};
 
 #[derive(Copy, Clone, Debug)]
 pub struct DnsHeader {
@@ -46,7 +46,7 @@ impl Default for DnsHeader {
     }
 }
 impl DnsHeader {
-    pub fn read(&mut self, buf: &mut BytePacketBuffer) -> Result {
+    pub fn read(&mut self, buf: &mut BytePacketBuffer) -> DnsResult {
         self.id = buf.read_u16()?;
 
         let flags = buf.read_u16()?;
@@ -71,7 +71,7 @@ impl DnsHeader {
         self.resource_entries = buf.read_u16()?;
         Ok(())
     }
-    pub fn write(&mut self, buf: &mut BytePacketBuffer) -> Result {
+    pub fn write(&mut self, buf: &mut BytePacketBuffer) -> DnsResult {
         buf.write_u16(self.id)?;
 
         buf.write_u8(

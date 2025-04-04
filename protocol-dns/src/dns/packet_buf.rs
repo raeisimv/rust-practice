@@ -27,18 +27,18 @@ impl BytePacketBuffer {
         self.pos
     }
 
-    pub fn step(&mut self, steps: usize) -> Result {
+    pub fn step(&mut self, steps: usize) -> DnsResult {
         self.pos += steps;
         Ok(())
     }
 
-    pub fn seek(&mut self, pos: usize) -> Result {
+    pub fn seek(&mut self, pos: usize) -> DnsResult {
         self.pos = pos;
 
         Ok(())
     }
 
-    pub fn read(&mut self) -> Result<u8> {
+    pub fn read(&mut self) -> DnsResult<u8> {
         if self.pos >= 512 {
             return Err("read: End of buffer".into());
         }
@@ -47,36 +47,36 @@ impl BytePacketBuffer {
         Ok(res)
     }
 
-    pub fn get(&self, pos: usize) -> Result<u8> {
+    pub fn get(&self, pos: usize) -> DnsResult<u8> {
         if pos >= 512 {
             return Err("get: End of buffer".into());
         }
         Ok(self.buf[pos])
     }
 
-    pub fn get_range(&self, start: usize, len: usize) -> Result<&[u8]> {
+    pub fn get_range(&self, start: usize, len: usize) -> DnsResult<&[u8]> {
         if start + len >= 512 {
             return Err("get_range: End of buffer".into());
         }
         Ok(&self.buf[start..start + len])
     }
 
-    pub fn set(&mut self, pos: usize, val: u8) -> Result {
+    pub fn set(&mut self, pos: usize, val: u8) -> DnsResult {
         self.buf[pos] = val;
 
         Ok(())
     }
-    pub fn set_u16(&mut self, pos: usize, val: u16) -> Result {
+    pub fn set_u16(&mut self, pos: usize, val: u16) -> DnsResult {
         self.set(pos + 0, ((val >> 8) & 0xFF) as u8)?;
         self.set(pos + 1, ((val >> 0) & 0xFF) as u8)?;
         Ok(())
     }
-    pub fn read_u16(&mut self) -> Result<u16> {
+    pub fn read_u16(&mut self) -> DnsResult<u16> {
         let res = ((self.read()? as u16) << 8) | (self.read()? as u16);
         Ok(res)
     }
 
-    pub fn read_u32(&mut self) -> Result<u32> {
+    pub fn read_u32(&mut self) -> DnsResult<u32> {
         let res = ((self.read()? as u32) << 24)
             | ((self.read()? as u32) << 16)
             | ((self.read()? as u32) << 8)
@@ -84,7 +84,7 @@ impl BytePacketBuffer {
         Ok(res)
     }
 
-    pub fn read_qname(&mut self, outstr: &mut String) -> Result {
+    pub fn read_qname(&mut self, outstr: &mut String) -> DnsResult {
         let mut pos = self.pos();
         let mut jumped = false;
         let mut jump_performed = 0;
@@ -130,7 +130,7 @@ impl BytePacketBuffer {
         Ok(())
     }
 
-    pub fn write(&mut self, val: u8) -> Result {
+    pub fn write(&mut self, val: u8) -> DnsResult {
         if self.pos >= 512 {
             return Err("write: end of buffer".into());
         };
@@ -139,23 +139,23 @@ impl BytePacketBuffer {
 
         Ok(())
     }
-    pub fn write_u8(&mut self, val: u8) -> Result {
+    pub fn write_u8(&mut self, val: u8) -> DnsResult {
         self.write(val)
     }
-    pub fn write_u16(&mut self, val: u16) -> Result {
+    pub fn write_u16(&mut self, val: u16) -> DnsResult {
         self.write(((val >> 8) & 0xFF) as u8)?;
         self.write((val & 0xFF) as u8)?;
 
         Ok(())
     }
-    pub fn write_u32(&mut self, val: u32) -> Result {
+    pub fn write_u32(&mut self, val: u32) -> DnsResult {
         self.write(((val >> 24) & 0xFF) as u8)?;
         self.write(((val >> 16) & 0xFF) as u8)?;
         self.write(((val >> 8) & 0xFF) as u8)?;
         self.write(((val >> 0) & 0xFF) as u8)?;
         Ok(())
     }
-    pub fn write_qname(&mut self, qname: &str) -> Result {
+    pub fn write_qname(&mut self, qname: &str) -> DnsResult {
         for label in qname.split(".") {
             let len = label.len();
             if len > 0x3f {

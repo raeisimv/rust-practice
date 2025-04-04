@@ -1,4 +1,6 @@
-use crate::dns::{BytePacketBuffer, DnsHeader, DnsQuestion, DnsRecord, Error, QueryType, Result};
+use crate::dns::{
+    BytePacketBuffer, DnsHeader, DnsQuestion, DnsRecord, DnsResult, Error, QueryType,
+};
 use std::net::Ipv4Addr;
 
 #[derive(Clone, Debug)]
@@ -12,7 +14,7 @@ pub struct DnsPacket {
 
 impl TryFrom<&mut BytePacketBuffer> for DnsPacket {
     type Error = Error;
-    fn try_from(buf: &mut BytePacketBuffer) -> Result<Self> {
+    fn try_from(buf: &mut BytePacketBuffer) -> DnsResult<Self> {
         let mut result = DnsPacket::default();
         result.header.read(buf)?;
 
@@ -38,7 +40,7 @@ impl TryFrom<&mut BytePacketBuffer> for DnsPacket {
 }
 impl TryInto<BytePacketBuffer> for DnsPacket {
     type Error = Error;
-    fn try_into(mut self) -> Result<BytePacketBuffer, Self::Error> {
+    fn try_into(mut self) -> DnsResult<BytePacketBuffer, Self::Error> {
         let mut buf = BytePacketBuffer::new();
         self.write(&mut buf)?;
 
@@ -58,7 +60,7 @@ impl Default for DnsPacket {
     }
 }
 impl DnsPacket {
-    pub fn write(&mut self, buf: &mut BytePacketBuffer) -> Result {
+    pub fn write(&mut self, buf: &mut BytePacketBuffer) -> DnsResult {
         self.header.questions = self.questions.len() as u16;
         self.header.answers = self.answers.len() as u16;
         self.header.authoritative_entries = self.authorities.len() as u16;

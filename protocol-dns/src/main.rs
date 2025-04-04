@@ -1,9 +1,9 @@
-use protocol_dns::dns::Result;
+use protocol_dns::dns::DnsResult;
 use protocol_dns::service::query_handler;
 
 const DEFAULT_NS_ADDR: &str = "198.41.0.4";
 
-fn main() -> Result {
+fn main() -> DnsResult {
     let addr = ("0.0.0.0", 2053);
     let ns_addr = DEFAULT_NS_ADDR.parse().unwrap();
     let socket = std::net::UdpSocket::bind(addr)?;

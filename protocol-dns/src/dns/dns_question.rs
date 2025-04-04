@@ -1,4 +1,4 @@
-use crate::dns::{BytePacketBuffer, QueryType, Result};
+use crate::dns::{BytePacketBuffer, DnsResult, QueryType};
 
 #[derive(Clone, Debug)]
 pub struct DnsQuestion {
@@ -11,7 +11,7 @@ impl DnsQuestion {
         Self { name, qtype }
     }
 
-    pub fn read(&mut self, buf: &mut BytePacketBuffer) -> Result {
+    pub fn read(&mut self, buf: &mut BytePacketBuffer) -> DnsResult {
         buf.read_qname(&mut self.name)?;
         let qtype = buf.read_u16()?;
         self.qtype = qtype.into();
@@ -20,7 +20,7 @@ impl DnsQuestion {
 
         Ok(())
     }
-    pub fn write(&self, buf: &mut BytePacketBuffer) -> Result {
+    pub fn write(&self, buf: &mut BytePacketBuffer) -> DnsResult {
         buf.write_qname(&self.name)?;
         buf.write_u16(self.qtype.into())?;
         buf.write_u16(1)?;

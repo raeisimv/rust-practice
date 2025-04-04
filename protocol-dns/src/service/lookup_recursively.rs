@@ -1,4 +1,4 @@
-use crate::dns::{DnsPacket, QueryType, Result, ResultCode};
+use crate::dns::{DnsPacket, DnsResult, QueryType, ResultCode};
 use crate::service::lookup;
 use std::net::Ipv4Addr;
 
@@ -6,7 +6,7 @@ pub fn lookup_recursively(
     qname: &str,
     qtype: QueryType,
     ns_default: Ipv4Addr,
-) -> Result<DnsPacket> {
+) -> DnsResult<DnsPacket> {
     let mut ns = ns_default.clone();
     loop {
         println!("attempting lookup of {qtype:?} {qname} with ns {ns}");

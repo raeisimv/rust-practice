@@ -1,7 +1,7 @@
-use crate::dns::{BytePacketBuffer, DnsPacket, DnsQuestion, QueryType, Result};
+use crate::dns::{BytePacketBuffer, DnsPacket, DnsQuestion, DnsResult, QueryType};
 use std::net::Ipv4Addr;
 
-pub fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> Result<DnsPacket> {
+pub fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> DnsResult<DnsPacket> {
     let socket = std::net::UdpSocket::bind(("0.0.0.0", 0))?;
 
     let mut packet = DnsPacket::default();
