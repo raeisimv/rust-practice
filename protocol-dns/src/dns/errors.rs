@@ -1,2 +1,2 @@
-pub type Error = Box<dyn std::error::Error>;
-pub type DnsResult<T = (), E = Error> = Result<T, E>;
+pub type DnsError = Box<dyn std::error::Error>;
+pub type DnsResult<T = (), E = DnsError> = Result<T, E>;

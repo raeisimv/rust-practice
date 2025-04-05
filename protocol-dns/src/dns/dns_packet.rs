@@ -1,5 +1,5 @@
 use crate::dns::{
-    BytePacketBuffer, DnsHeader, DnsQuestion, DnsRecord, DnsResult, Error, QueryType,
+    BytePacketBuffer, DnsHeader, DnsQuestion, DnsRecord, DnsResult, DnsError, QueryType,
 };
 use std::net::Ipv4Addr;
 
@@ -13,7 +13,7 @@ pub struct DnsPacket {
 }
 
 impl TryFrom<&mut BytePacketBuffer> for DnsPacket {
-    type Error = Error;
+    type Error = DnsError;
     fn try_from(buf: &mut BytePacketBuffer) -> DnsResult<Self> {
         let mut result = DnsPacket::default();
         result.header.read(buf)?;
@@ -39,7 +39,7 @@ impl TryFrom<&mut BytePacketBuffer> for DnsPacket {
     }
 }
 impl TryInto<BytePacketBuffer> for DnsPacket {
-    type Error = Error;
+    type Error = DnsError;
     fn try_into(mut self) -> DnsResult<BytePacketBuffer, Self::Error> {
         let mut buf = BytePacketBuffer::new();
         self.write(&mut buf)?;
