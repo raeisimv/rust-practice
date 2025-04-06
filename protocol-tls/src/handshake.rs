@@ -65,6 +65,12 @@ impl SessionId {
             size: 32,
         }
     }
+    pub fn empty() -> Self {
+        Self {
+            data: [0; 32],
+            size: 0,
+        }
+    }
     pub fn fixed() -> Self {
         Self {
             data: [
@@ -211,7 +217,7 @@ impl Codec for ExtKeyShare {
 
 pub fn create_client_hello(host: String, pub_key: &[u8]) -> Vec<u8> {
     let ver = u16::from(ProtocolVersion::TLSv1_2).to_be_bytes();
-    let session_id = SessionId::fixed();
+    let session_id = SessionId::empty();
     let handshake = {
         let mut buf = Vec::new();
 

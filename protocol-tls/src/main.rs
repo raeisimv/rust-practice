@@ -1,4 +1,4 @@
-use protocol_tls::{create_client_hello, create_paired_keys, TlsResult};
+use protocol_tls::{TlsResult, create_client_hello, create_paired_keys};
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
