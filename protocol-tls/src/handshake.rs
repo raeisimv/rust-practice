@@ -1,5 +1,7 @@
 use crate::DecodeError::InvalidMessage;
-use crate::{BufReader, Codec, DecodeError, ProtocolVersion, TlsResult, create_random_u8_32};
+use crate::{
+    create_random_u8_32, BufReader, Codec, DecodeError, ExtensionType, ProtocolVersion, TlsResult,
+};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Random {
@@ -279,13 +281,13 @@ fn create_client_hello_ext(host: String, pub_key: &[u8]) -> Vec<u8> {
     // ]; // TODO: remove hardcoded values
     // add_extension(ExtensionType::SignatureAlgorithms.into(), &pyl, &mut buf);
     //
-    // add_extension(ExtensionType::KeyShare.into(), pub_key, &mut buf);
-    //
-    // let pyl = [0x01];
-    // add_extension(ExtensionType::PSKKeyExchangeModes.into(), &pyl, &mut buf);
-    //
-    // let pyl = u16::from(ProtocolVersion::TLSv1_0).to_be_bytes();
-    // add_extension(ExtensionType::SupportedVersions.into(), &pyl, &mut buf);
+    add_extension(ExtensionType::KeyShare.into(), pub_key, &mut buf);
+
+    let pyl = [0x01];
+    add_extension(ExtensionType::PSKKeyExchangeModes.into(), &pyl, &mut buf);
+
+    let pyl = u16::from(ProtocolVersion::TLSv1_0).to_be_bytes();
+    add_extension(ExtensionType::SupportedVersions.into(), &pyl, &mut buf);
 
     buf
 }
