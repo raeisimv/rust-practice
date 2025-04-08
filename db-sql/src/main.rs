@@ -1,7 +1,8 @@
 use std::io::{stdin, Write};
 
 fn main() {
-    repl()
+    wall();
+    repl();
 }
 
 fn repl() {
@@ -10,6 +11,10 @@ fn repl() {
         std::io::stdout().flush().unwrap();
         match stdin().lines().next() {
             Some(Ok(line)) => {
+                if line.trim() == "exit" {
+                    println!("exiting ...");
+                    break;
+                }
                 println!("received: {}", line.trim());
             }
             Some(Err(e)) if e.kind() == std::io::ErrorKind::Interrupted => {
@@ -30,4 +35,13 @@ fn repl() {
             }
         }
     }
+}
+
+fn wall() {
+    println!("Welcome to DB SQL");
+    println!(" ** This is a try to create a database for practicing Rust **");
+    println!("Version: 0.1.0");
+    println!("Help:");
+    println!("Just write your SQL Command/Query here");
+    println!("-----------------------------------------------------");
 }
