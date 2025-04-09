@@ -1,3 +1,5 @@
+mod sql_parser;
+
 use std::io::{stdin, Write};
 
 fn main() {
