@@ -1,6 +1,7 @@
 mod sql_parser;
 
-use std::io::{stdin, Write};
+use crate::sql_parser::sql_parser;
+use std::io::{Write, stdin};
 
 fn main() {
     wall();
@@ -18,6 +19,8 @@ fn repl() {
                     break;
                 }
                 println!("received: {}", line.trim());
+                let x = sql_parser(&line);
+                println!("parsed: {x:?}");
             }
             Some(Err(e)) if e.kind() == std::io::ErrorKind::Interrupted => {
                 // CTRL + C
