@@ -1,12 +1,15 @@
-mod sql_parser;
+mod parser;
 
-use crate::sql_parser::sql_parser;
+use crate::parser::parse_select_query;
 use std::io::{Write, stdin};
 
 fn main() {
     wall();
     repl();
 }
+//https://cstack.github.io/db_tutorial/parts/part1.html
+// https://johns.codes/blog/build-a-db/part01
+//https://medium.com/@krizzsrivastava/retr0db-building-a-database-in-rust-b223e2b98cbd
 
 fn repl() {
     loop {
@@ -19,7 +22,7 @@ fn repl() {
                     break;
                 }
                 println!("received: {}", line.trim());
-                let x = sql_parser(&line);
+                let x = parse_select_query(&line);
                 println!("parsed: {x:?}");
             }
             Some(Err(e)) if e.kind() == std::io::ErrorKind::Interrupted => {
