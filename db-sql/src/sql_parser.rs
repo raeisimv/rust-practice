@@ -1,11 +1,14 @@
-use nom::branch::alt;
-use nom::bytes::tag;
-use nom::character::complete::{space0, space1};
-use nom::combinator::opt;
-use nom::multi::separated_list1;
-use nom::sequence::{delimited, preceded};
 use nom::{
-    IResult, Parser, bytes::complete::take_while1, character::complete::char, combinator::map,
+    branch::alt, bytes::complete::take_while1,
+    bytes::tag_no_case,
+    character::complete::char,
+    character::complete::{space0, space1},
+    combinator::map,
+    combinator::opt,
+    multi::separated_list1,
+    sequence::{delimited, preceded},
+    IResult,
+    Parser,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -28,7 +31,7 @@ fn column_list(input: &str) -> IResult<&str, Vec<String>> {
 
 fn where_clause(input: &str) -> IResult<&str, String> {
     preceded(
-        (space0, tag("WHERE"), space1),
+        (space0, tag_no_case("WHERE"), space1),
         map(take_while1(|x| x != ';'), |x: &str| x.to_string()),
     )
     .parse(input)
@@ -37,8 +40,8 @@ fn where_clause(input: &str) -> IResult<&str, String> {
 fn select_statement(input: &str) -> IResult<&str, SqlStatement> {
     map(
         (
-            preceded((space0, tag("SELECT"), space1), column_list),
-            preceded((space0, tag("FROM"), space1), identifier),
+            preceded((space0, tag_no_case("SELECT"), space1), column_list),
+            preceded((space0, tag_no_case("FROM"), space1), identifier),
             opt(where_clause),
             space0,
             opt(char(';')),
