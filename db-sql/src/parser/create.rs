@@ -8,17 +8,6 @@ use nom::{
 };
 use crate::parser::{identifier, SqlStatement};
 
-#[derive(Copy, Clone, Debug)]
-pub enum SqlDataType {
-    Integer,
-    String,
-}
-#[derive(Clone, Debug)]
-pub struct ColumnDefinition {
-    pub name: String,
-    pub data_type: SqlDataType,
-}
-
 // fn parse_column_definition(input: &str) -> IResult<&str, Vec<String>> {
 //     separated_list1(delimited(
 //         space0,

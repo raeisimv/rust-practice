@@ -16,6 +16,16 @@ pub enum SqlStatement {
     },
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum SqlDataType {
+    Integer,
+    String,
+}
+#[derive(Clone, Debug)]
+pub struct ColumnDefinition {
+    pub name: String,
+    pub data_type: SqlDataType,
+}
 
 fn identifier(input: &str) -> IResult<&str, String> {
     let x = take_while1(|c: char| c.is_alphanumeric() || c == '_');
