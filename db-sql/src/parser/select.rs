@@ -1,4 +1,4 @@
-use crate::parser::{identifier, SqlStatement};
+use crate::parser::{SqlStatement, identifier};
 use nom::{
     IResult, Parser,
     branch::alt,
@@ -11,7 +11,6 @@ use nom::{
     multi::separated_list1,
     sequence::{delimited, preceded},
 };
-
 
 fn column_list(input: &str) -> IResult<&str, Vec<String>> {
     separated_list1(delimited(space0, char(','), space0), identifier).parse(input)

@@ -1,7 +1,7 @@
 mod create;
 mod select;
 
-use nom::{bytes::complete::take_while1, combinator::map, IResult, Parser};
+use nom::{IResult, Parser, bytes::complete::take_while1, combinator::map};
 pub use select::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
