@@ -1,6 +1,8 @@
-use crate::parser::{identifier, ColumnDefinition, SqlDataType, SqlStatement};
+use crate::parser::{ColumnDefinition, SqlDataType, SqlStatement, identifier};
 use nom::{
-    branch::alt, bytes::tag_no_case,
+    IResult, Parser,
+    branch::alt,
+    bytes::tag_no_case,
     character::char,
     character::complete::{space0, space1},
     combinator::map,
@@ -8,8 +10,6 @@ use nom::{
     multi::separated_list1,
     sequence::delimited,
     sequence::preceded,
-    IResult,
-    Parser,
 };
 
 fn data_type(input: &str) -> IResult<&str, SqlDataType> {
@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn should_parse_create_statement() {
-        let input = "CREATE TABLE users ( id INT PRIMARY KEY, name STRING );";
+        let input = "CREATE TABLE users (id INT PRIMARY KEY, name STRING);";
         let (_, parsed) = parse_create_statement(input).unwrap();
         assert_eq!(
             parsed,
