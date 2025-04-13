@@ -1,7 +1,7 @@
 mod create;
 mod select;
 
-use nom::{IResult, Parser, bytes::complete::take_while1, combinator::map};
+use nom::{bytes::complete::take_while1, combinator::map, IResult, Parser};
 pub use select::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -13,10 +13,11 @@ pub enum SqlStatement {
     },
     Create {
         table: String,
+        columns: Vec<ColumnDefinition>,
     },
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum SqlDataType {
     Integer,
     String,
@@ -41,7 +42,7 @@ impl TryFrom<&str> for SqlDataType {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ColumnDefinition {
     pub name: String,
     pub data_type: SqlDataType,
