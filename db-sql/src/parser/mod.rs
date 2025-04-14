@@ -1,8 +1,23 @@
 mod create;
 mod select;
 
-use nom::{bytes::complete::take_while1, combinator::map, IResult, Parser};
+pub use create::*;
 pub use select::*;
+
+use nom::{IResult, Parser, bytes::complete::take_while1, combinator::map};
+
+pub fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
+    if let Ok(x) = parse_select_query(input.trim()) {
+        Ok(x)
+    } else if let Ok(x) = parse_create_statement(input) {
+        Ok(x)
+    } else {
+        Err(nom::Err::Error(nom::error::make_error(
+            input,
+            nom::error::ErrorKind::Fail,
+        )))
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SqlStatement {

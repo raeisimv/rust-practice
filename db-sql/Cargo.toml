@@ -2,6 +2,7 @@
 name = "db-sql"
 version = "0.1.0"
 edition = "2024"
+authors = ["Morteza Raeisi <raeisimv@outlook.com>"]
 
 [dependencies]
 nom = { version = "8" }
