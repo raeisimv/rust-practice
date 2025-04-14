@@ -1,4 +1,5 @@
 mod create;
+mod insert;
 mod select;
 
 pub use create::*;
@@ -29,6 +30,10 @@ pub enum SqlStatement {
     Create {
         table: String,
         columns: Vec<ColumnDefinition>,
+    },
+    Insert {
+        table: String,
+        values: Vec<String>,
     },
 }
 
