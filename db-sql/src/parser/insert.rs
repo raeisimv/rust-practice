@@ -1,8 +1,29 @@
-use crate::parser::SqlStatement;
-use nom::IResult;
+use crate::parser::{SqlStatement, identifier};
+use nom::{
+    IResult, Parser,
+    bytes::tag_no_case,
+    character::complete::{space0, space1},
+    combinator::{map, opt},
+    sequence::preceded,
+};
 
 pub fn parse_insert_statement(input: &str) -> IResult<&str, SqlStatement> {
-    todo!()
+    map(
+        (preceded(
+            (
+                space0,
+                tag_no_case("INSERT"),
+                space1,
+                opt(tag_no_case("INTO")),
+            ),
+            identifier,
+        )),
+        |(table)| SqlStatement::Insert {
+            table,
+            values: vec![],
+        },
+    )
+    .parse(input)
 }
 
 #[cfg(test)]
