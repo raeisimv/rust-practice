@@ -6,14 +6,8 @@ pub use create::*;
 pub use select::*;
 
 use nom::{
-    character::char,
-    bytes::streaming::tag_no_case,
-    branch::alt,
-    sequence::delimited,
-    bytes::complete::take_while1,
-    combinator::map,
-    IResult,
-    Parser
+    branch::alt, bytes::complete::take_while1, bytes::streaming::tag_no_case, character::char, combinator::map,
+    sequence::delimited, IResult, Parser,
 };
 
 pub fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
@@ -77,6 +71,7 @@ pub enum SqlValue {
     Boolean(bool),
     Integer(i32),
     Float(f64),
+    Nil,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -99,7 +94,6 @@ fn string_value(input: &str) -> IResult<&str, String> {
     )
     .parse(input)
 }
-
 fn boolean_value(input: &str) -> IResult<&str, bool> {
     let (input, val) = alt((tag_no_case("true"), tag_no_case("false"))).parse(input)?;
 
@@ -109,10 +103,19 @@ fn boolean_value(input: &str) -> IResult<&str, bool> {
         Ok((input, false))
     }
 }
-
-fn int_value(input: &str) -> IResult<&str, i32> {
-    map(take_while1(|x: char| x.is_numeric()), |s: &str| {
-        s.parse::<i32>().unwrap_or_default()
-    })
+fn nil_value(input: &str) -> IResult<&str, SqlValue> {
+    map(tag_no_case("NIL"), |_| SqlValue::Nil).parse(input)
+}
+fn int_value(input: &str) -> IResult<&str, SqlValue> {
+    map(
+        take_while1(|x: char| x.is_numeric() || x == '-' || x == '.'),
+        |s: &str| {
+            if s.contains('.') {
+                SqlValue::Float(s.parse::<f64>().expect("Invalid Float"))
+            } else {
+                SqlValue::Integer(s.parse::<i32>().expect("Invalid Integer"))
+            }
+        },
+    )
     .parse(input)
 }
