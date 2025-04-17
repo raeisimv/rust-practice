@@ -2,8 +2,9 @@ mod create;
 mod insert;
 mod select;
 
-pub use create::*;
-pub use select::*;
+use create::*;
+use insert::*;
+use select::*;
 
 use nom::{
     IResult, Parser, branch::alt, bytes::complete::take_while1, bytes::streaming::tag_no_case,
@@ -14,6 +15,8 @@ pub fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
     if let Ok(x) = parse_select_query(input.trim()) {
         Ok(x)
     } else if let Ok(x) = parse_create_statement(input) {
+        Ok(x)
+    } else if let Ok(x) = parse_insert_statement(input) {
         Ok(x)
     } else {
         Err(nom::Err::Error(nom::error::make_error(

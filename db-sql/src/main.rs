@@ -22,7 +22,7 @@ fn repl() {
                     println!("exiting ...");
                     break;
                 }
-                println!("received: {}", line.trim());
+                // println!("received: {}", line.trim());
                 let x = parse_sql(&line);
                 println!("parsed: {x:?}");
             }
