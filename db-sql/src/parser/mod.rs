@@ -6,8 +6,8 @@ pub use create::*;
 pub use select::*;
 
 use nom::{
-    branch::alt, bytes::complete::take_while1, bytes::streaming::tag_no_case, character::char, combinator::map,
-    sequence::delimited, IResult, Parser,
+    IResult, Parser, branch::alt, bytes::complete::take_while1, bytes::streaming::tag_no_case,
+    character::char, combinator::map, sequence::delimited,
 };
 
 pub fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
@@ -86,21 +86,24 @@ fn identifier(input: &str) -> IResult<&str, String> {
     map(x, |s: &str| s.to_string()).parse(input)
 }
 
-fn string_value(input: &str) -> IResult<&str, String> {
-    delimited(
-        char('\''),
-        map(take_while1(|x| x != '\''), |s: &str| s.to_string()),
-        char('\''),
+fn string_value(input: &str) -> IResult<&str, SqlValue> {
+    map(
+        delimited(
+            char('\''),
+            map(take_while1(|x| x != '\''), |s: &str| s.to_string()),
+            char('\''),
+        ),
+        |x| SqlValue::String(x),
     )
     .parse(input)
 }
-fn boolean_value(input: &str) -> IResult<&str, bool> {
+fn boolean_value(input: &str) -> IResult<&str, SqlValue> {
     let (input, val) = alt((tag_no_case("true"), tag_no_case("false"))).parse(input)?;
 
     if val.to_lowercase() == "true" {
-        Ok((input, true))
+        Ok((input, SqlValue::Boolean(true)))
     } else {
-        Ok((input, false))
+        Ok((input, SqlValue::Boolean(false)))
     }
 }
 fn nil_value(input: &str) -> IResult<&str, SqlValue> {
