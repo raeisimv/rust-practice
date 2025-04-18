@@ -29,17 +29,21 @@ pub fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
 #[derive(Clone, Debug, PartialEq)]
 pub enum SqlStatement {
     Select {
-        table: String,
+        table: Identifier,
         columns: Vec<String>,
         condition: Option<String>,
     },
     Create {
-        table: String,
+        table: Identifier,
         columns: Vec<ColumnDefinition>,
     },
     Insert {
-        table: String,
+        table: Identifier,
         values: Vec<SqlValue>,
+    },
+    Delete {
+        table: String,
+        condition: Vec<(Identifier, Condition)>,
     },
 }
 
@@ -79,16 +83,37 @@ pub enum SqlValue {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ColumnDefinition {
-    pub name: String,
+    pub name: Identifier,
     pub data_type: SqlDataType,
     pub constraint: Option<String>,
 }
 
-fn identifier(input: &str) -> IResult<&str, String> {
-    let x = take_while1(|c: char| c.is_alphanumeric() || c == '_');
-    map(x, |s: &str| s.to_string()).parse(input)
+#[derive(Clone, Debug, PartialEq)]
+pub enum Condition {
+    Equal(SqlValue),
+    NotEqual(SqlValue),
+    Greater(SqlValue),
+    Less(SqlValue),
+    GreaterEqual(SqlValue),
+    LessEqual(SqlValue),
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Identifier(String);
+impl From<&str> for Identifier {
+    fn from(value: &str) -> Self {
+        Self(String::from(value))
+    }
+}
+fn identifier(input: &str) -> IResult<&str, Identifier> {
+    let x = take_while1(|c: char| c.is_alphanumeric() || c == '_');
+    map(x, Identifier::from).parse(input)
+}
+
+fn identifier_string(input: &str) -> IResult<&str, String> {
+    let x = take_while1(|c: char| c.is_alphanumeric() || c == '_');
+    map(x, |x: &str| x.into()).parse(input)
+}
 fn string_value(input: &str) -> IResult<&str, SqlValue> {
     map(
         delimited(

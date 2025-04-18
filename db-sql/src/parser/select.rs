@@ -1,4 +1,4 @@
-use crate::parser::{SqlStatement, identifier};
+use crate::parser::{SqlStatement, identifier, identifier_string};
 use nom::{
     IResult, Parser,
     branch::alt,
@@ -13,7 +13,7 @@ use nom::{
 };
 
 fn column_list(input: &str) -> IResult<&str, Vec<String>> {
-    separated_list1(delimited(space0, char(','), space0), identifier).parse(input)
+    separated_list1(delimited(space0, char(','), space0), identifier_string).parse(input)
 }
 
 fn where_clause(input: &str) -> IResult<&str, String> {
@@ -59,7 +59,7 @@ mod tests {
             (
                 "",
                 SqlStatement::Select {
-                    table: "users".to_string(),
+                    table: "users".into(),
                     columns: vec!["id".into(), "email".into(), "username".into()],
                     condition: Some("id = 1".into()),
                 }

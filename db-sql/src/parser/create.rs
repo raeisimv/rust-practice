@@ -52,7 +52,7 @@ fn column_definition(input: &str) -> IResult<&str, ColumnDefinition> {
             opt(preceded(space1, constraint)),
         ),
         |(name, data_type, constraint)| ColumnDefinition {
-            name: name.to_string(),
+            name: name.into(),
             data_type,
             constraint,
         },
@@ -99,7 +99,7 @@ mod tests {
         assert_eq!(
             parsed,
             SqlStatement::Create {
-                table: "users".to_string(),
+                table: "users".into(),
                 columns: vec![
                     ColumnDefinition {
                         name: "id".into(),
