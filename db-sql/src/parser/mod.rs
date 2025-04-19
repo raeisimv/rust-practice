@@ -43,8 +43,8 @@ pub enum SqlStatement {
         values: Vec<SqlValue>,
     },
     Delete {
-        table: String,
-        condition: Vec<(Identifier, Condition)>,
+        table: Identifier,
+        condition: Option<Vec<(Identifier, Condition)>>,
     },
 }
 
