@@ -1,16 +1,17 @@
-use crate::parser::SqlValue;
+use crate::parser::{identifier, parse_sql_value, Identifier, SqlValue};
 use nom::branch::alt;
 use nom::bytes::tag_no_case;
-use nom::character::complete::space1;
-use nom::combinator::{map, opt};
-use nom::sequence::preceded;
+use nom::character::char;
+use nom::character::complete::{space0, space1};
+use nom::combinator::{cut, map, opt};
+use nom::sequence::{delimited, preceded};
 use nom::IResult;
 use nom::Parser;
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Condition {
     Comparison {
-        left: String,
+        left: Identifier,
         operator: Operator,
         right: SqlValue,
     },
@@ -55,7 +56,39 @@ fn parse_logical_operator(input: &str) -> IResult<&str, LogicalOperator> {
     ))
     .parse(input)
 }
-fn parse_condition(input: &str) -> IResult<&str, Condition> {}
+fn parse_condition(input: &str) -> IResult<&str, Condition> {
+    cut(alt((
+        delimited(
+            preceded(space0, char('(')),
+            parse_condition,
+            preceded(space0, char(')')),
+        ),
+        map(
+            (
+                parse_condition,
+                preceded(space1, parse_logical_operator),
+                preceded(space1, parse_condition),
+            ),
+            |(f, operator, l)| Condition::Logical {
+                operator,
+                conditions: vec![f, l],
+            },
+        ),
+        map(
+            (
+                preceded(space1, identifier),
+                preceded(space1, parse_operator),
+                preceded(space1, parse_sql_value),
+            ),
+            |(left, operator, right)| Condition::Comparison {
+                left,
+                operator,
+                right,
+            },
+        ),
+    )))
+    .parse(input)
+}
 pub fn parse_where_clause(input: &str) -> IResult<&str, Option<Condition>> {
     opt(preceded((space1, tag_no_case("WHERE")), parse_condition)).parse(input)
 }

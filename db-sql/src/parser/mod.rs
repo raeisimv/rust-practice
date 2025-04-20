@@ -152,3 +152,6 @@ fn int_value(input: &str) -> IResult<&str, SqlValue> {
     )
     .parse(input)
 }
+fn parse_sql_value(input: &str) -> IResult<&str, SqlValue> {
+    alt((string_value, int_value, boolean_value, nil_value)).parse(input)
+}
