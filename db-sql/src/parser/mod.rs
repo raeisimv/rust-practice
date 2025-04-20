@@ -2,6 +2,7 @@ mod create;
 mod delete;
 mod insert;
 mod select;
+mod condition;
 
 use create::*;
 use insert::*;
