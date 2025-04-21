@@ -1,3 +1,4 @@
+use crate::parser::condition::parse_where_clause;
 use crate::parser::{SqlStatement, identifier, identifier_string};
 use nom::{
     IResult, Parser,
@@ -29,7 +30,7 @@ fn select_statement(input: &str) -> IResult<&str, SqlStatement> {
         (
             preceded((space0, tag_no_case("SELECT"), space1), column_list),
             preceded((space0, tag_no_case("FROM"), space1), identifier),
-            opt(where_clause),
+            parse_where_clause,
             space0,
             opt(char(';')),
         ),
@@ -49,6 +50,8 @@ pub fn parse_select_query(input: &str) -> IResult<&str, SqlStatement> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::parser::SqlValue;
+    use crate::parser::condition::{Condition, Operator};
 
     #[test]
     fn should_parse_select_statement() {
@@ -61,7 +64,12 @@ mod tests {
                 SqlStatement::Select {
                     table: "users".into(),
                     columns: vec!["id".into(), "email".into(), "username".into()],
-                    condition: Some("id = 1".into()),
+                    condition: Some(Condition::Comparison {
+                        left: "id".into(),
+                        operator: Operator::Equal,
+                        right: SqlValue::Integer(1),
+                    }),
+                    // condition: Some("id = 1".into()),
                 }
             )
         );

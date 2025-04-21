@@ -1,5 +1,6 @@
 use crate::parser::{
-    SqlStatement, SqlValue, boolean_value, identifier, int_value, nil_value, string_value,
+    SqlStatement, SqlValue, boolean_value, identifier, int_value, nil_value, parse_sql_value,
+    string_value,
 };
 use nom::{
     IResult, Parser,
@@ -13,11 +14,8 @@ use nom::{
     sequence::preceded,
 };
 
-fn value_expression(input: &str) -> IResult<&str, SqlValue> {
-    alt((string_value, int_value, boolean_value, nil_value)).parse(input)
-}
 fn value_list(input: &str) -> IResult<&str, Vec<SqlValue>> {
-    separated_list1(delimited(space0, char(','), space0), value_expression).parse(input)
+    separated_list1(delimited(space0, char(','), space0), parse_sql_value).parse(input)
 }
 pub fn parse_insert_statement(input: &str) -> IResult<&str, SqlStatement> {
     map(

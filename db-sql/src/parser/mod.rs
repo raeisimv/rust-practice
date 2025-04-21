@@ -1,9 +1,10 @@
+mod condition;
 mod create;
 mod delete;
 mod insert;
 mod select;
-mod condition;
 
+use condition::*;
 use create::*;
 use insert::*;
 use select::*;
@@ -33,7 +34,7 @@ pub enum SqlStatement {
     Select {
         table: Identifier,
         columns: Vec<String>,
-        condition: Option<String>,
+        condition: Option<Condition>,
     },
     Create {
         table: Identifier,
@@ -45,7 +46,7 @@ pub enum SqlStatement {
     },
     Delete {
         table: Identifier,
-        condition: Option<Vec<(Identifier, Condition)>>,
+        condition: Option<Condition>,
     },
 }
 
@@ -90,15 +91,15 @@ pub struct ColumnDefinition {
     pub constraint: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum Condition {
-    Equal(SqlValue),
-    NotEqual(SqlValue),
-    Greater(SqlValue),
-    Less(SqlValue),
-    GreaterEqual(SqlValue),
-    LessEqual(SqlValue),
-}
+// #[derive(Clone, Debug, PartialEq)]
+// pub enum Condition {
+//     Equal(SqlValue),
+//     NotEqual(SqlValue),
+//     Greater(SqlValue),
+//     Less(SqlValue),
+//     GreaterEqual(SqlValue),
+//     LessEqual(SqlValue),
+// }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Identifier(String);
