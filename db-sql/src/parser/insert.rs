@@ -1,10 +1,8 @@
 use crate::parser::{
-    SqlStatement, SqlValue, boolean_value, identifier, int_value, nil_value, parse_sql_value,
-    string_value,
+    SqlStatement, SqlValue, identifier, parse_sql_value,
 };
 use nom::{
     IResult, Parser,
-    branch::alt,
     bytes::tag_no_case,
     character::char,
     character::complete::{space0, space1},

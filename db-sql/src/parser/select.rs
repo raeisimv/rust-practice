@@ -3,7 +3,6 @@ use crate::parser::{SqlStatement, identifier, identifier_string};
 use nom::{
     IResult, Parser,
     branch::alt,
-    bytes::complete::take_while1,
     bytes::tag_no_case,
     character::complete::char,
     character::complete::{space0, space1},
@@ -15,14 +14,6 @@ use nom::{
 
 fn column_list(input: &str) -> IResult<&str, Vec<String>> {
     separated_list1(delimited(space0, char(','), space0), identifier_string).parse(input)
-}
-
-fn where_clause(input: &str) -> IResult<&str, String> {
-    preceded(
-        (space0, tag_no_case("WHERE"), space1),
-        map(take_while1(|x| x != ';'), |x: &str| x.to_string()),
-    )
-    .parse(input)
 }
 
 fn select_statement(input: &str) -> IResult<&str, SqlStatement> {

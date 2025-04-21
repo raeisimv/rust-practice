@@ -37,8 +37,8 @@ pub enum LogicalOperator {
 }
 fn parse_operator(input: &str) -> IResult<&str, Operator> {
     alt((
-        map(tag_no_case("="), |_| Operator::Equal),
         map(tag_no_case("=="), |_| Operator::Equal),
+        map(tag_no_case("="), |_| Operator::Equal),
         map(tag_no_case("!="), |_| Operator::NotEqual),
         map(tag_no_case("<="), |_| Operator::LessThanOrEqual),
         map(tag_no_case("<"), |_| Operator::LessThan),
@@ -63,17 +63,17 @@ fn parse_condition(input: &str) -> IResult<&str, Condition> {
             parse_condition,
             preceded(space0, char(')')),
         ),
-        map(
-            (
-                parse_condition,
-                preceded(space1, parse_logical_operator),
-                preceded(space1, parse_condition),
-            ),
-            |(f, operator, l)| Condition::Logical {
-                operator,
-                conditions: vec![f, l],
-            },
-        ),
+        // map(
+        //     (
+        //         parse_condition,
+        //         preceded(space1, parse_logical_operator),
+        //         preceded(space1, parse_condition),
+        //     ),
+        //     |(f, operator, l)| Condition::Logical {
+        //         operator,
+        //         conditions: vec![f, l],
+        //     },
+        // ),
         map(
             (
                 preceded(space1, identifier),
@@ -91,4 +91,23 @@ fn parse_condition(input: &str) -> IResult<&str, Condition> {
 }
 pub fn parse_where_clause(input: &str) -> IResult<&str, Option<Condition>> {
     opt(preceded((space1, tag_no_case("WHERE")), parse_condition)).parse(input)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn should_parse_where_clause() {
+        let input = " WHERE id = 1";
+        let (_, res) = parse_where_clause(input).unwrap();
+        assert_eq!(
+            res,
+            Some(Condition::Comparison {
+                left: "id".into(),
+                operator: Operator::Equal,
+                right: SqlValue::Integer(1)
+            })
+        )
+    }
 }
