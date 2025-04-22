@@ -1,6 +1,6 @@
 mod parser;
 
-use crate::parser::parse_sql;
+use crate::parser::SqlStatement;
 use std::io::{Write, stdin};
 
 fn main() {
@@ -23,7 +23,7 @@ fn repl() {
                     break;
                 }
                 // println!("received: {}", line.trim());
-                let x = parse_sql(&line);
+                let x = SqlStatement::try_from(line.as_str());
                 println!("parsed: {x:?}");
             }
             Some(Err(e)) if e.kind() == std::io::ErrorKind::Interrupted => {

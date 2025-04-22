@@ -15,7 +15,7 @@ use nom::{
     character::char, combinator::map, sequence::delimited,
 };
 
-pub fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
+fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
     if let Ok(x) = parse_select_query(input.trim()) {
         Ok(x)
     } else if let Ok(x) = parse_create_statement(input) {
@@ -51,6 +51,17 @@ pub enum SqlStatement {
         table: Identifier,
         condition: Option<Condition>,
     },
+}
+
+impl TryFrom<&str> for SqlStatement {
+    type Error = String;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match parse_sql(value) {
+            Ok(x) => Ok(x.1),
+            Err(e) => Err(e.to_string()),
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
