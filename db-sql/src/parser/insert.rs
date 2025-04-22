@@ -1,6 +1,4 @@
-use crate::parser::{
-    SqlStatement, SqlValue, identifier, parse_sql_value,
-};
+use crate::parser::{SqlStatement, SqlValue, identifier, parse_sql_value};
 use nom::{
     IResult, Parser,
     bytes::tag_no_case,

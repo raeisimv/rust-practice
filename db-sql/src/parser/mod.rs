@@ -6,6 +6,7 @@ mod select;
 
 use condition::*;
 use create::*;
+use delete::*;
 use insert::*;
 use select::*;
 
@@ -18,6 +19,8 @@ pub fn parse_sql(input: &str) -> IResult<&str, SqlStatement> {
     if let Ok(x) = parse_select_query(input.trim()) {
         Ok(x)
     } else if let Ok(x) = parse_create_statement(input) {
+        Ok(x)
+    } else if let Ok(x) = parse_delete_command(input) {
         Ok(x)
     } else if let Ok(x) = parse_insert_statement(input) {
         Ok(x)
