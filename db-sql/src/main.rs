@@ -1,3 +1,4 @@
+mod exec;
 mod parser;
 
 use crate::parser::SqlStatement;

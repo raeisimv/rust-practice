@@ -116,7 +116,7 @@ pub struct ColumnDefinition {
 // }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Identifier(String);
+pub struct Identifier(pub String);
 impl From<&str> for Identifier {
     fn from(value: &str) -> Self {
         Self(String::from(value))
