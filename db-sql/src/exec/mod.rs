@@ -29,4 +29,10 @@ impl Table {
 
         id
     }
+    pub fn delete(&mut self, id: usize) {
+        self.rows.remove(&id);
+    }
+    pub fn get(&self, id: usize) -> Option<&StoredRow> {
+        self.rows.get(&id)
+    }
 }
