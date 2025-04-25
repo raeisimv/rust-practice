@@ -1,14 +1,13 @@
 use crate::{
     parser::condition::parse_where_clause,
-    parser::{SqlStatement, identifier}
+    parser::{SqlStatement, identifier},
 };
 use nom::{
-    character::complete::{space0, space1},
+    IResult, Parser,
     bytes::tag_no_case,
-    Parser,
-    IResult,
+    character::complete::{space0, space1},
     combinator::map,
-    sequence::preceded
+    sequence::preceded,
 };
 
 pub fn parse_delete_command(input: &str) -> IResult<&str, SqlStatement> {

@@ -1,13 +1,12 @@
 use crate::parser::{Identifier, SqlValue, identifier, parse_sql_value};
 use nom::{
+    IResult, Parser,
     branch::alt,
-    Parser,
-    IResult,
     bytes::tag_no_case,
     character::char,
     character::complete::{space0, space1},
     combinator::{cut, map, opt},
-    sequence::{delimited, preceded}
+    sequence::{delimited, preceded},
 };
 
 #[derive(Clone, PartialEq, Debug)]

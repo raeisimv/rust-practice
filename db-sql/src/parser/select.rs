@@ -1,6 +1,6 @@
 use crate::{
     parser::condition::parse_where_clause,
-    parser::{SqlStatement, identifier, identifier_string}
+    parser::{SqlStatement, identifier, identifier_string},
 };
 use nom::{
     IResult, Parser,
