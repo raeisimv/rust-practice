@@ -1,11 +1,15 @@
-use crate::parser::condition::parse_where_clause;
-use crate::parser::{SqlStatement, identifier};
-use nom::IResult;
-use nom::Parser;
-use nom::bytes::tag_no_case;
-use nom::character::complete::{space0, space1};
-use nom::combinator::map;
-use nom::sequence::preceded;
+use crate::{
+    parser::condition::parse_where_clause,
+    parser::{SqlStatement, identifier}
+};
+use nom::{
+    character::complete::{space0, space1},
+    bytes::tag_no_case,
+    Parser,
+    IResult,
+    combinator::map,
+    sequence::preceded
+};
 
 pub fn parse_delete_command(input: &str) -> IResult<&str, SqlStatement> {
     map(

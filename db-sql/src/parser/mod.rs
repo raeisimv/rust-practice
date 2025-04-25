@@ -105,16 +105,6 @@ pub struct ColumnDefinition {
     pub constraint: Option<String>,
 }
 
-// #[derive(Clone, Debug, PartialEq)]
-// pub enum Condition {
-//     Equal(SqlValue),
-//     NotEqual(SqlValue),
-//     Greater(SqlValue),
-//     Less(SqlValue),
-//     GreaterEqual(SqlValue),
-//     LessEqual(SqlValue),
-// }
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Identifier(pub String);
 impl From<&str> for Identifier {

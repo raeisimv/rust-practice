@@ -1,12 +1,14 @@
 use crate::parser::{Identifier, SqlValue, identifier, parse_sql_value};
-use nom::IResult;
-use nom::Parser;
-use nom::branch::alt;
-use nom::bytes::tag_no_case;
-use nom::character::char;
-use nom::character::complete::{space0, space1};
-use nom::combinator::{cut, map, opt};
-use nom::sequence::{delimited, preceded};
+use nom::{
+    branch::alt,
+    Parser,
+    IResult,
+    bytes::tag_no_case,
+    character::char,
+    character::complete::{space0, space1},
+    combinator::{cut, map, opt},
+    sequence::{delimited, preceded}
+};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Condition {
