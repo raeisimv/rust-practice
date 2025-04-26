@@ -1,5 +1,8 @@
 use crate::parser::ColumnDefinition;
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::btree_map::Iter,
+    collections::{BTreeMap, HashMap},
+};
 
 type StoredRow = HashMap<String, String>;
 type ColumnInfo = Vec<ColumnDefinition>;
@@ -34,5 +37,8 @@ impl Table {
     }
     pub fn get(&self, id: usize) -> Option<&StoredRow> {
         self.rows.get(&id)
+    }
+    pub fn iter(&self) -> Iter<'_, usize, StoredRow> {
+        self.rows.iter()
     }
 }
