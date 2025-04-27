@@ -1,6 +1,6 @@
+mod errors;
 mod exec;
 mod parser;
-mod errors;
 
 use crate::parser::SqlStatement;
 use std::io::{Write, stdin};

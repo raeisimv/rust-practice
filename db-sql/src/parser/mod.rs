@@ -105,7 +105,7 @@ pub struct ColumnDefinition {
     pub constraint: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Identifier(pub String);
 impl From<&str> for Identifier {
     fn from(value: &str) -> Self {
