@@ -20,9 +20,19 @@ impl ExecutionContext {
     pub fn exec(&mut self, cmd: &SqlStatement) -> DbResult<(), ExecutionError> {
         match cmd {
             SqlStatement::Select { table, .. } => {
-                if self.tables.get(table).is_none() {
+                let Some(tbl) = self.tables.get(table) else {
                     return Err(ExecutionError::TableNotFound);
-                }
+                };
+            }
+            SqlStatement::Insert { table, values } => {
+                let Some(tbl) = self.tables.get(table) else {
+                    return Err(ExecutionError::TableNotFound);
+                };
+            }
+            SqlStatement::Create { table, .. } => {
+                if self.tables.get(table).is_some() {
+                    return Err(ExecutionError::TableAlreadyExists);
+                };
             }
             _ => {}
         }
