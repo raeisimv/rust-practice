@@ -4,8 +4,8 @@ use std::{
     collections::{BTreeMap, HashMap},
 };
 
-type StoredRow = HashMap<String, String>;
-type ColumnInfo = Vec<ColumnDefinition>;
+pub type StoredRow = HashMap<String, String>;
+pub type ColumnInfo = Vec<ColumnDefinition>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Table {
