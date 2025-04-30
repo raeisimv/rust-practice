@@ -7,9 +7,8 @@ use std::collections::HashMap;
 pub enum ExecutionResult {
     Select,
     Insert,
-    Update,
-    Delete,
     Create,
+    Delete(usize),
 }
 
 #[derive(Debug)]
@@ -26,14 +25,14 @@ impl ExecutionContext {
     pub fn exec(&mut self, cmd: &SqlStatement) -> DbResult<ExecutionResult, ExecutionError> {
         match cmd {
             SqlStatement::Select { table, .. } => {
-                let Some(tbl) = self.tables.get(table) else {
+                let Some(_tbl) = self.tables.get(table) else {
                     return Err(ExecutionError::TableNotFound);
                 };
 
                 Ok(ExecutionResult::Select)
             }
             SqlStatement::Insert { table, values } => {
-                let Some(tbl) = self.tables.get(table) else {
+                let Some(_tbl) = self.tables.get(table) else {
                     return Err(ExecutionError::TableNotFound);
                 };
 
@@ -47,11 +46,11 @@ impl ExecutionContext {
                 Ok(ExecutionResult::Create)
             }
             SqlStatement::Delete { table, .. } => {
-                let Some(tbl) = self.tables.get(table) else {
+                let Some(_tbl) = self.tables.get(table) else {
                     return Err(ExecutionError::TableNotFound);
                 };
 
-                Ok(ExecutionResult::Delete)
+                Ok(ExecutionResult::Delete(0))
             }
         }
     }
