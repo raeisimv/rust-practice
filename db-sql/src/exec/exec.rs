@@ -38,10 +38,13 @@ impl ExecutionContext {
 
                 Ok(ExecutionResult::Insert)
             }
-            SqlStatement::Create { table, .. } => {
+            SqlStatement::Create { table, columns } => {
                 if self.tables.get(table).is_some() {
                     return Err(ExecutionError::TableAlreadyExists);
                 };
+
+                let t = Table::new(columns.clone());
+                self.tables.insert(table.clone(), t);
 
                 Ok(ExecutionResult::Create)
             }
