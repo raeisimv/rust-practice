@@ -9,6 +9,7 @@ use create::*;
 use delete::*;
 use insert::*;
 use select::*;
+use std::fmt::{Display, Formatter};
 
 use nom::{
     IResult, Parser, branch::alt, bytes::complete::take_while1, bytes::streaming::tag_no_case,
@@ -96,6 +97,11 @@ pub enum SqlValue {
     Integer(i32),
     Float(f64),
     Nil,
+}
+impl Display for SqlValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
