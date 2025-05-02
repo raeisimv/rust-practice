@@ -32,10 +32,11 @@ impl ExecutionContext {
                 Ok(ExecutionResult::Select)
             }
             SqlStatement::Insert { table, values } => {
-                let Some(_tbl) = self.tables.get(table) else {
+                let Some(tbl) = self.tables.get_mut(table) else {
                     return Err(ExecutionError::TableNotFound);
                 };
 
+                tbl.insert(values.iter().map(|x| x.to_string()).collect());
                 Ok(ExecutionResult::Insert)
             }
             SqlStatement::Create { table, columns } => {
