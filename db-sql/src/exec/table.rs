@@ -39,8 +39,8 @@ impl Table {
     pub fn get(&self, id: usize) -> Option<&StoredRow> {
         self.rows.get(&id)
     }
-    pub fn iter(&self) -> Iter<'_, usize, StoredRow> {
-        self.rows.iter()
+    pub fn iter(&self) -> impl Iterator<Item = Row> {
+        self.into_iter()
     }
 }
 
@@ -60,7 +60,7 @@ impl<'a> Row<'a> {
     }
 }
 
-pub(crate) struct TableIter<'a> {
+pub struct TableIter<'a> {
     map_iter: Iter<'a, usize, StoredRow>,
     columns: Rc<ColumnInfo>,
 }
@@ -78,5 +78,16 @@ impl<'a> Iterator for TableIter<'a> {
         self.map_iter
             .next()
             .map(|(id, data)| Row::new(id.clone(), self.columns.clone(), data))
+    }
+}
+
+impl<'a> IntoIterator for &'a Table {
+    type Item = Row<'a>;
+
+    type IntoIter = TableIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let col_info = Rc::new(self.columns.clone());
+        TableIter::new(self.rows.iter(), col_info)
     }
 }
