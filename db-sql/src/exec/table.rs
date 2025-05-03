@@ -2,6 +2,7 @@ use crate::parser::ColumnDefinition;
 use std::{
     collections::btree_map::Iter,
     collections::{BTreeMap, HashMap},
+    rc::Rc,
 };
 
 pub type StoredRow = HashMap<String, String>;
@@ -40,5 +41,42 @@ impl Table {
     }
     pub fn iter(&self) -> Iter<'_, usize, StoredRow> {
         self.rows.iter()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Row<'a> {
+    id: usize,
+    columns: Rc<ColumnInfo>,
+    values: &'a HashMap<String, String>,
+}
+impl<'a> Row<'a> {
+    pub fn new(id: usize, columns: Rc<ColumnInfo>, values: &'a HashMap<String, String>) -> Self {
+        Self {
+            id,
+            columns,
+            values,
+        }
+    }
+}
+
+pub(crate) struct TableIter<'a> {
+    map_iter: Iter<'a, usize, StoredRow>,
+    columns: Rc<ColumnInfo>,
+}
+
+impl<'a> TableIter<'a> {
+    pub fn new(map_iter: Iter<'a, usize, StoredRow>, columns: Rc<ColumnInfo>) -> Self {
+        Self { map_iter, columns }
+    }
+}
+
+impl<'a> Iterator for TableIter<'a> {
+    type Item = Row<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.map_iter
+            .next()
+            .map(|(id, data)| Row::new(id.clone(), self.columns.clone(), data))
     }
 }
