@@ -1,11 +1,13 @@
-use crate::errors::{DbResult, ExecutionError};
-use crate::exec::Table;
-use crate::parser::{Identifier, SqlStatement};
+use crate::{
+    errors::{DbResult, ExecutionError},
+    exec::{Row, Table},
+    parser::{Identifier, SqlStatement},
+};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum ExecutionResult {
-    Select,
+#[derive(Debug, Clone)]
+pub enum ExecutionResult<'a> {
+    Select(Vec<Row<'a>>),
     Insert,
     Create,
     Delete(usize),
@@ -25,11 +27,11 @@ impl ExecutionContext {
     pub fn exec(&mut self, cmd: &SqlStatement) -> DbResult<ExecutionResult, ExecutionError> {
         match cmd {
             SqlStatement::Select { table, .. } => {
-                let Some(_tbl) = self.tables.get(table) else {
+                let Some(tbl) = self.tables.get(table) else {
                     return Err(ExecutionError::TableNotFound);
                 };
 
-                Ok(ExecutionResult::Select)
+                Ok(ExecutionResult::Select(tbl.iter().collect()))
             }
             SqlStatement::Insert { table, values } => {
                 let Some(tbl) = self.tables.get_mut(table) else {
