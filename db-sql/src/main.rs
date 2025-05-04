@@ -2,6 +2,7 @@ mod errors;
 mod exec;
 mod parser;
 
+use crate::exec::ExecutionContext;
 use crate::parser::SqlStatement;
 use std::io::{Write, stdin};
 
@@ -15,6 +16,8 @@ fn main() {
 //https://medium.com/@krizzsrivastava/retr0db-building-a-database-in-rust-b223e2b98cbd
 
 fn repl() {
+    let mut ctx = ExecutionContext::new();
+
     loop {
         print!("> ");
         std::io::stdout().flush().unwrap();
@@ -24,9 +27,17 @@ fn repl() {
                     println!("exiting ...");
                     break;
                 }
-                // println!("received: {}", line.trim());
-                let x = SqlStatement::try_from(line.as_str());
-                println!("parsed: {x:?}");
+                let stmt = SqlStatement::try_from(line.as_str());
+                if let Err(e) = stmt {
+                    eprintln!("PARSER ERR: {:?}", e);
+                    continue;
+                }
+                let res = ctx.exec(&stmt.unwrap());
+                if let Err(e) = res {
+                    eprintln!("EXECUTION ERR: {:?}", e);
+                } else {
+                    println!("EXECUTION RESULTS: {:?}", res);
+                }
             }
             Some(Err(e)) if e.kind() == std::io::ErrorKind::Interrupted => {
                 // CTRL + C
