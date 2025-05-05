@@ -100,7 +100,13 @@ pub enum SqlValue {
 }
 impl Display for SqlValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        match self {
+            SqlValue::String(s) => write!(f, "{}", s),
+            SqlValue::Boolean(b) => write!(f, "{}", b),
+            SqlValue::Integer(i) => write!(f, "{}", i),
+            SqlValue::Float(x) => write!(f, "{}", x),
+            SqlValue::Nil => write!(f, "nil"),
+        }
     }
 }
 
@@ -116,6 +122,11 @@ pub struct Identifier(pub String);
 impl From<&str> for Identifier {
     fn from(value: &str) -> Self {
         Self(String::from(value))
+    }
+}
+impl Display for Identifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 fn identifier(input: &str) -> IResult<&str, Identifier> {
