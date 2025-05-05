@@ -46,9 +46,9 @@ impl Table {
 
 #[derive(Debug, Clone)]
 pub struct Row<'a> {
-    id: usize,
-    columns: Rc<ColumnInfo>,
-    values: &'a HashMap<String, String>,
+    pub id: usize,
+    pub columns: Rc<ColumnInfo>,
+    pub values: &'a HashMap<String, String>,
 }
 impl<'a> Row<'a> {
     pub fn new(id: usize, columns: Rc<ColumnInfo>, values: &'a HashMap<String, String>) -> Self {

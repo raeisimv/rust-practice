@@ -4,6 +4,7 @@ use crate::{
     parser::{Identifier, SqlStatement},
 };
 use std::collections::HashMap;
+use std::fmt::Display;
 
 #[derive(Debug, Clone)]
 pub enum ExecutionResult<'a> {
@@ -13,6 +14,27 @@ pub enum ExecutionResult<'a> {
     Delete(usize),
 }
 
+impl Display for ExecutionResult<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let ExecutionResult::Select(rows) = self {
+            for (i, row) in rows.iter().enumerate() {
+                if i == 0 {
+                    for col in row.columns.iter() {
+                        write!(f, "{} \t| ", col.name)?;
+                    }
+                }
+                write!(f, "\n")?;
+                for val in row.values.iter() {
+                    write!(f, "{} \t| ", val.1)?;
+                }
+            }
+        } else {
+            write!(f, "{self:?}")?;
+        }
+
+        Ok(())
+    }
+}
 #[derive(Debug)]
 pub struct ExecutionContext {
     tables: HashMap<Identifier, Table>,

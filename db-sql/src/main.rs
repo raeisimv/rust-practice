@@ -36,7 +36,7 @@ fn repl() {
                 if let Err(e) = res {
                     eprintln!("EXECUTION ERR: {:?}", e);
                 } else {
-                    println!("EXECUTION RESULTS: {:?}", res);
+                    println!("{}", res.unwrap());
                 }
             }
             Some(Err(e)) if e.kind() == std::io::ErrorKind::Interrupted => {
