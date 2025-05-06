@@ -46,6 +46,17 @@ impl ExecutionContext {
             tables: HashMap::new(),
         }
     }
+    pub fn run(&mut self, input: &str) -> DbResult<ExecutionResult, ExecutionError> {
+        let stmt = SqlStatement::try_from(input);
+        if let Err(e) = stmt {
+            eprintln!("PARSER ERR: {:?}", e);
+            return Err(ExecutionError::ParserError(e.to_string()));
+        }
+        let res = self.exec(&stmt.unwrap())?;
+        println!("{}", res);
+        Ok(res)
+    }
+
     pub fn exec(&mut self, cmd: &SqlStatement) -> DbResult<ExecutionResult, ExecutionError> {
         match cmd {
             SqlStatement::Select { table, .. } => {

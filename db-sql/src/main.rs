@@ -3,7 +3,6 @@ mod exec;
 mod parser;
 
 use crate::exec::ExecutionContext;
-use crate::parser::SqlStatement;
 use std::io::{Write, stdin};
 
 fn main() {
@@ -27,17 +26,7 @@ fn repl() {
                     println!("exiting ...");
                     break;
                 }
-                let stmt = SqlStatement::try_from(line.as_str());
-                if let Err(e) = stmt {
-                    eprintln!("PARSER ERR: {:?}", e);
-                    continue;
-                }
-                let res = ctx.exec(&stmt.unwrap());
-                if let Err(e) = res {
-                    eprintln!("EXECUTION ERR: {:?}", e);
-                } else {
-                    println!("{}", res.unwrap());
-                }
+                let _ = ctx.run(line.as_str());
             }
             Some(Err(e)) if e.kind() == std::io::ErrorKind::Interrupted => {
                 // CTRL + C
