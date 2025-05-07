@@ -36,6 +36,9 @@ impl Table {
     pub fn delete(&mut self, id: usize) {
         self.rows.remove(&id);
     }
+    pub fn clear_all(&mut self) {
+        self.rows.clear();
+    }
     pub fn get(&self, id: usize) -> Option<&StoredRow> {
         self.rows.get(&id)
     }

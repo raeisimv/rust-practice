@@ -84,11 +84,15 @@ impl ExecutionContext {
 
                 Ok(ExecutionResult::Create)
             }
-            SqlStatement::Delete { table, .. } => {
-                let Some(_tbl) = self.tables.get(table) else {
+            SqlStatement::Delete { table, condition } => {
+                let Some(tbl) = self.tables.get_mut(table) else {
                     return Err(ExecutionError::TableNotFound);
                 };
-
+                if condition.is_none() {
+                    tbl.clear_all();
+                } else {
+                    tbl.delete(0);
+                }
                 Ok(ExecutionResult::Delete(0))
             }
         }
