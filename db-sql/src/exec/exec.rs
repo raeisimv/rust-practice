@@ -60,16 +60,18 @@ impl ExecutionContext {
     pub fn exec(&mut self, cmd: &SqlStatement) -> DbResult<ExecutionResult, ExecutionError> {
         match cmd {
             SqlStatement::Select { table, .. } => {
-                let Some(tbl) = self.tables.get(table) else {
-                    return Err(ExecutionError::TableNotFound);
-                };
+                let tbl = self
+                    .tables
+                    .get(table)
+                    .ok_or(ExecutionError::TableNotFound)?;
 
                 Ok(ExecutionResult::Select(tbl.iter().collect()))
             }
             SqlStatement::Insert { table, values } => {
-                let Some(tbl) = self.tables.get_mut(table) else {
-                    return Err(ExecutionError::TableNotFound);
-                };
+                let tbl = self
+                    .tables
+                    .get_mut(table)
+                    .ok_or(ExecutionError::TableNotFound)?;
 
                 tbl.insert(values.iter().map(|x| x.to_string()).collect());
                 Ok(ExecutionResult::Insert)
@@ -85,9 +87,11 @@ impl ExecutionContext {
                 Ok(ExecutionResult::Create)
             }
             SqlStatement::Delete { table, condition } => {
-                let Some(tbl) = self.tables.get_mut(table) else {
-                    return Err(ExecutionError::TableNotFound);
-                };
+                let tbl = self
+                    .tables
+                    .get_mut(table)
+                    .ok_or(ExecutionError::TableNotFound)?;
+
                 if condition.is_none() {
                     tbl.clear_all();
                 } else {
