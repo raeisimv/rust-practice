@@ -3,15 +3,14 @@ use crate::{
     exec::{Row, Table},
     parser::{Identifier, SqlStatement},
 };
-use std::collections::HashMap;
-use std::fmt::Display;
+use std::{collections::HashMap, fmt::Display};
 
 #[derive(Debug, Clone)]
 pub enum ExecutionResult<'a> {
     Select(Vec<Row<'a>>),
     Insert,
     Create,
-    Delete(usize),
+    Delete,
 }
 
 impl Display for ExecutionResult<'_> {
@@ -20,12 +19,12 @@ impl Display for ExecutionResult<'_> {
             for (i, row) in rows.iter().enumerate() {
                 if i == 0 {
                     for col in row.columns.iter() {
-                        write!(f, "{} \t| ", col.name)?;
+                        write!(f, "\t{}\t| ", col.name)?;
                     }
                 }
                 write!(f, "\n")?;
                 for val in row.values.iter() {
-                    write!(f, "{} \t| ", val.1)?;
+                    write!(f, "\t{}\t| ", val.1)?;
                 }
             }
         } else {
@@ -97,7 +96,7 @@ impl ExecutionContext {
                 } else {
                     tbl.delete(0);
                 }
-                Ok(ExecutionResult::Delete(0))
+                Ok(ExecutionResult::Delete)
             }
         }
     }
